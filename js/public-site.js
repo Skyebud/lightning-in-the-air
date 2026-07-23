@@ -214,6 +214,7 @@ function setupMembers(members) {
 
     const card = document.createElement("a");
     card.className = "member-card";
+    card.dataset.memberId = member.id || String(index + 1);
     card.href = `#${anchorId}`;
     card.setAttribute("aria-label", `Read about ${member.name}`);
 
@@ -241,6 +242,7 @@ function setupMembers(members) {
 
     const profile = document.createElement("article");
     profile.className = `member-profile${index % 2 ? " reverse" : ""}`;
+    profile.dataset.memberId = member.id || String(index + 1);
     profile.id = anchorId;
 
     const profileImage = document.createElement("div");

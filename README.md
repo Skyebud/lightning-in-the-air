@@ -1,4 +1,4 @@
-# Lightning in the Air Website — Version 7
+# Lightning in the Air Website — Version 8
 
 Website
 
@@ -19,8 +19,14 @@ Use VS Code Live Server or another local web server. YouTube embeds require an `
 See `FIREBASE-SETUP.md` for the future admin and storage connection steps.
 
 
-## Version 7 changes
+## Version 8 changes
 
 - Rebuilt the band page with clickable member portraits and on-page profile excerpts.
 - Re-cropped member portraits from the original supplied group photo and enlarged them with non-generative image processing.
 - Removed the song-list section from Shows and placed selected repertoire in a collapsed Booking section.
+
+
+## Version 8 changes
+
+- Reframed the member portraits so faces sit more naturally in the cards and profile sections.
+- Increased the homepage corner logo while keeping it clear of faces.
