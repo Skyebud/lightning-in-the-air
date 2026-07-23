@@ -363,9 +363,9 @@ a.calendar-event:hover{background:var(--orange)}
 }
 
 .member-card,.member-profile{--portrait-x:0%;--portrait-y:0%;--portrait-scale:1}
-.member-card[data-member-id="tom-howle"],.member-profile[data-member-id="tom-howle"]{--portrait-x:-8%;--portrait-y:0%;--portrait-scale:1.05}
+.member-card[data-member-id="tom-howle"],.member-profile[data-member-id="tom-howle"]{--portrait-x:0%;--portrait-y:0%;--portrait-scale:1}
 .member-card[data-member-id="ben-benefield"],.member-profile[data-member-id="ben-benefield"]{--portrait-x:-6%;--portrait-y:0%;--portrait-scale:1.035}
-.member-card[data-member-id="james-patton"],.member-profile[data-member-id="james-patton"]{--portrait-x:-7%;--portrait-y:0%;--portrait-scale:1.045}
+.member-card[data-member-id="james-patton"],.member-profile[data-member-id="james-patton"]{--portrait-x:0%;--portrait-y:0%;--portrait-scale:1}
 .member-card[data-member-id="sergio-flores"],.member-profile[data-member-id="sergio-flores"]{--portrait-x:-3%;--portrait-y:0%;--portrait-scale:1.02}
 .member-photo img,.member-profile-image img{
   transform:translate(var(--portrait-x),var(--portrait-y)) scale(var(--portrait-scale));
@@ -379,3 +379,5 @@ a.calendar-event:hover{background:var(--orange)}
   .home-hero .hero-photo .hero-corner-logo{width:110px;max-height:145px}
   .hero-actions{padding-right:122px}
 }
+
+/* Version 9: corrected source crops for Tom Howle and James Patton */

@@ -30,3 +30,7 @@ See `FIREBASE-SETUP.md` for the future admin and storage connection steps.
 
 - Reframed the member portraits so faces sit more naturally in the cards and profile sections.
 - Increased the homepage corner logo while keeping it clear of faces.
+
+
+## Version 9
+Re-centered Tom Howle and James Patton using new non-generative crops from the original group photograph.
