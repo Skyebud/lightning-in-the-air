@@ -32,29 +32,21 @@
 <main id="main-content">
   <section class="page-hero compact band-page-hero">
     <div class="page-hero-backdrop"><img src="assets/images/band-full.webp" alt="Lightning in the Air together onstage"></div>
-    <div class="container page-hero-inner"><p class="eyebrow">The Band</p><h1>Meet the band.</h1></div>
+    <div class="container page-hero-inner"><p class="eyebrow">The Band</p><h1>Meet Lightning in the Air.</h1></div>
   </section>
 
   <section class="section paper member-section">
     <div class="container">
-      <div class="section-heading compact-heading"><div><p class="eyebrow dark">Lightning in the Air</p><h2>Seven musicians.</h2></div><p>Click a photo.</p></div>
-      <div class="member-grid" data-member-grid></div>
+      <div class="section-heading compact-heading member-heading">
+        <div><p class="eyebrow dark">The lineup</p><h2>Meet the band.</h2></div>
+        <p>Choose a member to jump to their story.</p>
+      </div>
+      <nav class="member-grid" id="member-lineup" aria-label="Band members" data-member-grid></nav>
+      <div class="member-profiles" data-member-profiles></div>
     </div>
   </section>
 
   <section class="quote-band"><div class="container"><blockquote>“A group that truly delivers.”</blockquote><cite>Greg Stone · Shelby County Arts Council</cite></div></section>
-
-  <dialog class="member-dialog" data-member-dialog>
-    <button class="member-dialog-close" type="button" aria-label="Close" data-member-dialog-close>×</button>
-    <div class="member-dialog-grid">
-      <img data-member-dialog-image src="" alt="">
-      <div>
-        <p class="eyebrow dark" data-member-dialog-role></p>
-        <h2 data-member-dialog-name></h2>
-        <p class="member-story" data-member-dialog-story></p>
-      </div>
-    </div>
-  </dialog>
 </main>
 <footer class="site-footer">
   <div class="container footer-grid">

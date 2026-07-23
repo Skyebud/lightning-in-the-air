@@ -1,4 +1,6 @@
-# Lightning in the Air Website
+# Lightning in the Air Website — Version 7
+
+Website
 
 Public pages:
 - Home
@@ -15,3 +17,10 @@ The public site reads shows, videos, photos, settings, and member stories from F
 Use VS Code Live Server or another local web server. YouTube embeds require an `http://` or `https://` page. Opening `index.html` directly as a `file://` page will show video posters instead of the embedded players.
 
 See `FIREBASE-SETUP.md` for the future admin and storage connection steps.
+
+
+## Version 7 changes
+
+- Rebuilt the band page with clickable member portraits and on-page profile excerpts.
+- Re-cropped member portraits from the original supplied group photo and enlarged them with non-generative image processing.
+- Removed the song-list section from Shows and placed selected repertoire in a collapsed Booking section.

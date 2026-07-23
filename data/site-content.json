@@ -80,7 +80,7 @@
       "role": "Guitar",
       "photoUrl": "assets/images/members/tom-howle.webp",
       "photoAlt": "Tom Howle playing guitar with Lightning in the Air",
-      "story": "",
+      "story": "Tom Howle brings guitar to the Lightning in the Air lineup.",
       "published": true,
       "order": 1
     },
@@ -90,7 +90,7 @@
       "role": "Vocals · Guitar · Percussion",
       "photoUrl": "assets/images/members/ben-benefield.webp",
       "photoAlt": "Ben Benefield performing with Lightning in the Air",
-      "story": "",
+      "story": "Ben Benefield leads vocals and adds guitar and percussion to the live show.",
       "published": true,
       "order": 2
     },
@@ -100,7 +100,7 @@
       "role": "Guitar",
       "photoUrl": "assets/images/members/taylor-goodwin.webp",
       "photoAlt": "Taylor Goodwin playing guitar with Lightning in the Air",
-      "story": "",
+      "story": "Taylor Goodwin brings guitar to the band’s Southern rock sound.",
       "published": true,
       "order": 3
     },
@@ -110,7 +110,7 @@
       "role": "Bass",
       "photoUrl": "assets/images/members/jaymes-tunnell.webp",
       "photoAlt": "Jaymes Tunnell playing bass with Lightning in the Air",
-      "story": "",
+      "story": "Jaymes Tunnell holds down the low end on bass.",
       "published": true,
       "order": 4
     },
@@ -120,7 +120,7 @@
       "role": "Keys",
       "photoUrl": "assets/images/members/elliot-margolies.webp",
       "photoAlt": "Elliot Margolies playing keys with Lightning in the Air",
-      "story": "",
+      "story": "Elliot Margolies fills out the band’s sound on keys.",
       "published": true,
       "order": 5
     },
@@ -130,7 +130,7 @@
       "role": "Sax · Flute",
       "photoUrl": "assets/images/members/sergio-flores.webp",
       "photoAlt": "Sergio Flores playing saxophone with Lightning in the Air",
-      "story": "",
+      "story": "Sergio Flores brings saxophone and flute to the lineup.",
       "published": true,
       "order": 6
     },
@@ -140,7 +140,7 @@
       "role": "Drums",
       "photoUrl": "assets/images/members/james-patton.webp",
       "photoAlt": "James Patton playing drums with Lightning in the Air",
-      "story": "",
+      "story": "James Patton drives the show from the drums.",
       "published": true,
       "order": 7
     }

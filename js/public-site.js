@@ -206,36 +206,24 @@ function setupGallery(photos) {
 
 function setupMembers(members) {
   const grid = $("[data-member-grid]");
-  const dialog = $("[data-member-dialog]");
-  if (!grid || !members.length) return;
+  const profiles = $("[data-member-profiles]");
+  if (!grid || !profiles || !members.length) return;
 
-  const dialogImage = dialog ? $("[data-member-dialog-image]", dialog) : null;
-  const dialogName = dialog ? $("[data-member-dialog-name]", dialog) : null;
-  const dialogRole = dialog ? $("[data-member-dialog-role]", dialog) : null;
-  const dialogStory = dialog ? $("[data-member-dialog-story]", dialog) : null;
+  members.forEach((member, index) => {
+    const anchorId = `member-${member.id || index + 1}`;
 
-  function openMember(member) {
-    if (!dialog) return;
-    dialogImage.src = member.photoUrl;
-    dialogImage.alt = member.photoAlt || member.name;
-    dialogName.textContent = member.name;
-    dialogRole.textContent = member.role;
-    dialogStory.textContent = member.story?.trim() || `More about ${member.name} coming soon.`;
-    dialog.showModal();
-  }
-
-  members.forEach((member) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "member-card";
-    button.setAttribute("aria-label", `Meet ${member.name}`);
+    const card = document.createElement("a");
+    card.className = "member-card";
+    card.href = `#${anchorId}`;
+    card.setAttribute("aria-label", `Read about ${member.name}`);
 
     const imageWrap = document.createElement("span");
     imageWrap.className = "member-photo";
     const image = document.createElement("img");
     image.src = member.photoUrl;
     image.alt = member.photoAlt || member.name;
-    image.loading = "lazy";
+    image.loading = index < 4 ? "eager" : "lazy";
+    image.decoding = "async";
     imageWrap.append(image);
 
     const copy = document.createElement("span");
@@ -244,16 +232,44 @@ function setupMembers(members) {
     name.textContent = member.name;
     const role = document.createElement("span");
     role.textContent = member.role;
-    copy.append(name, role);
+    const prompt = document.createElement("em");
+    prompt.textContent = "Meet the member ↓";
+    copy.append(name, role, prompt);
 
-    button.append(imageWrap, copy);
-    button.addEventListener("click", () => openMember(member));
-    grid.append(button);
-  });
+    card.append(imageWrap, copy);
+    grid.append(card);
 
-  $("[data-member-dialog-close]", dialog)?.addEventListener("click", () => dialog.close());
-  dialog?.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
+    const profile = document.createElement("article");
+    profile.className = `member-profile${index % 2 ? " reverse" : ""}`;
+    profile.id = anchorId;
+
+    const profileImage = document.createElement("div");
+    profileImage.className = "member-profile-image";
+    const detailImage = document.createElement("img");
+    detailImage.src = member.photoUrl;
+    detailImage.alt = member.photoAlt || member.name;
+    detailImage.loading = "lazy";
+    detailImage.decoding = "async";
+    profileImage.append(detailImage);
+
+    const detail = document.createElement("div");
+    detail.className = "member-profile-copy";
+    const detailRole = document.createElement("p");
+    detailRole.className = "eyebrow";
+    detailRole.textContent = member.role;
+    const detailName = document.createElement("h2");
+    detailName.textContent = member.name;
+    const story = document.createElement("p");
+    story.className = "member-story";
+    story.textContent = member.story?.trim() || `More about ${member.name} is coming soon.`;
+    const back = document.createElement("a");
+    back.className = "text-link yellow";
+    back.href = "#member-lineup";
+    back.textContent = "Back to lineup ↑";
+    detail.append(detailRole, detailName, story, back);
+
+    profile.append(profileImage, detail);
+    profiles.append(profile);
   });
 }
 
