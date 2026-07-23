@@ -1,17 +1,17 @@
 {
   "site": {
     "announcement": "Now booking select 2026 and 2027 dates",
+    "heroEyebrow": "Alabama's Marshall Tucker Band tribute",
+    "heroTitle": "Turn it up.",
+    "heroText": "Seven musicians bringing the songs, harmonies, jams, and Southern-rock energy of The Marshall Tucker Band back to the stage.",
+    "bookingContact": "Booking Team",
     "bookingEmail": "lita.bhm@gmail.com",
     "bookingPhone": "205-369-2325",
-    "bookingContact": "Tom Howle",
+    "youtubeUrl": "https://www.youtube.com/@LightningintheAir",
     "facebookUrl": "",
     "instagramUrl": "",
-    "youtubeUrl": "https://www.youtube.com/@LightningintheAir",
-    "heroEyebrow": "Alabama's high-energy Marshall Tucker tribute",
-    "heroTitle": "The sound. The spirit. The songs.",
-    "heroText": "A seven-piece concert experience celebrating the guitar harmonies, flute, sax, keys, vocals, and Southern-rock energy audiences know by heart.",
     "homeQuote": "They put on a quality show, treat people right, and leave audiences wanting just one more song.",
-    "homeQuoteBy": "Greg Stone \u00b7 Executive Director, Shelby County Arts Council"
+    "homeQuoteBy": "Greg Stone · Executive Director, Shelby County Arts Council"
   },
   "shows": [
     {
@@ -19,11 +19,12 @@
       "title": "Lightning in the Air at MadLife",
       "venue": "MadLife",
       "city": "",
+      "state": "",
       "date": "",
       "displayDate": "October 2",
       "time": "7:00 PM",
       "ticketUrl": "",
-      "details": "Draft listing. Confirm the year and ticket link before publishing.",
+      "details": "",
       "published": false,
       "featured": true,
       "order": 10
@@ -34,7 +35,7 @@
       "id": "promo",
       "title": "Official Lightning in the Air Tribute Promo",
       "youtubeUrl": "https://www.youtube.com/watch?v=C7-L9rXvx_E",
-      "description": "A fast look at the full-band sound, musicianship, and Southern-rock concert experience.",
+      "description": "Official band promo.",
       "featured": true,
       "published": true,
       "order": 1
@@ -52,7 +53,7 @@
       "id": "bob-away-my-blues",
       "title": "Bob Away My Blues at Elysian Gardens",
       "youtubeUrl": "https://www.youtube.com/watch?v=aNBCM6lxMmQ",
-      "description": "Live performance short from Elysian Gardens.",
+      "description": "Live at Elysian Gardens.",
       "featured": false,
       "published": true,
       "order": 3
@@ -80,29 +81,83 @@
     {
       "id": "group",
       "url": "assets/images/band-full.webp",
-      "alt": "The seven members of Lightning in the Air standing together onstage",
-      "caption": "Lightning in the Air \u2014 A Marshall Tucker Tribute",
+      "alt": "The members of Lightning in the Air standing together onstage",
+      "caption": "Lightning in the Air — A Marshall Tucker Tribute",
       "featured": true,
       "published": true,
       "order": 1
     },
     {
-      "id": "collage",
-      "url": "assets/images/band-collage.webp",
-      "alt": "Live performance collage featuring the members of Lightning in the Air",
-      "caption": "The band live onstage",
+      "id": "stage",
+      "url": "assets/images/live-stage.webp",
+      "alt": "Lightning in the Air performing live onstage",
+      "caption": "The full band live onstage",
       "featured": false,
       "published": true,
       "order": 2
     },
     {
-      "id": "poster",
-      "url": "assets/images/poster.webp",
-      "alt": "Lightning in the Air promotional poster",
-      "caption": "Official promotional artwork",
+      "id": "guitar-one",
+      "url": "assets/images/lead-guitar-left.webp",
+      "alt": "Guitarist performing live with Lightning in the Air",
+      "caption": "Live guitar",
       "featured": false,
       "published": true,
       "order": 3
+    },
+    {
+      "id": "vocals",
+      "url": "assets/images/ben-benfield.webp",
+      "alt": "Lead vocalist and acoustic guitarist performing live",
+      "caption": "Lead vocals and acoustic guitar",
+      "featured": false,
+      "published": true,
+      "order": 4
+    },
+    {
+      "id": "guitar-two",
+      "url": "assets/images/taylor-goodwin.webp",
+      "alt": "Guitarist performing live with Lightning in the Air",
+      "caption": "Live guitar",
+      "featured": false,
+      "published": true,
+      "order": 5
+    },
+    {
+      "id": "bass",
+      "url": "assets/images/jay-bass.webp",
+      "alt": "Bass guitarist performing live with Lightning in the Air",
+      "caption": "Bass and vocals",
+      "featured": false,
+      "published": true,
+      "order": 6
+    },
+    {
+      "id": "keys",
+      "url": "assets/images/elliot-keys.webp",
+      "alt": "Keyboard player performing live with Lightning in the Air",
+      "caption": "Keyboards",
+      "featured": false,
+      "published": true,
+      "order": 7
+    },
+    {
+      "id": "sax",
+      "url": "assets/images/sergio-sax.webp",
+      "alt": "Saxophone player performing live with Lightning in the Air",
+      "caption": "Saxophone and flute",
+      "featured": false,
+      "published": true,
+      "order": 8
+    },
+    {
+      "id": "drums",
+      "url": "assets/images/james-drums.webp",
+      "alt": "Drummer performing live with Lightning in the Air",
+      "caption": "Drums",
+      "featured": false,
+      "published": true,
+      "order": 9
     }
   ]
 }
