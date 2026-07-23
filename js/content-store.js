@@ -51,6 +51,7 @@ export async function getShows({ includeDrafts = false } = {}) {
 }
 export async function getVideos({ includeDrafts = false } = {}) { return (await getCollection("videos")).filter((item) => includeDrafts || item.published === true).sort(byOrder); }
 export async function getPhotos({ includeDrafts = false } = {}) { return (await getCollection("photos")).filter((item) => includeDrafts || item.published === true).sort(byOrder); }
+export async function getMembers({ includeDrafts = false } = {}) { return (await getCollection("members")).filter((item) => includeDrafts || item.published === true).sort(byOrder); }
 export function youtubeId(value = "") {
   const match = value.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
   return match?.[1] || (value.match(/^[A-Za-z0-9_-]{11}$/)?.[0] ?? "");

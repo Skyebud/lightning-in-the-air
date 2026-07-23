@@ -11,6 +11,7 @@ service cloud.firestore {
     match /shows/{document} { allow read: if true; allow write: if isAdmin(); }
     match /videos/{document} { allow read: if true; allow write: if isAdmin(); }
     match /photos/{document} { allow read: if true; allow write: if isAdmin(); }
+    match /members/{document} { allow read: if true; allow write: if isAdmin(); }
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;

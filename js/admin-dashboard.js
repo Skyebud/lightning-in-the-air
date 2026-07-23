@@ -1,28 +1,434 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-import { collection, getDocs, getDoc, doc, setDoc, addDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  setDoc,
+  addDoc,
+  deleteDoc,
+  writeBatch
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 import { auth, db, storage, firebaseEnabled } from "./firebase-client.js";
 
-const $ = (s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-let state = { shows: [], videos: [], photos: [], settings: {}, user: null };
-function message(selector,text,type="") { const el=$(selector); if(!el)return; el.textContent=text; el.className=`admin-message ${type}`; }
-function safeFile(name){ return name.toLowerCase().replace(/[^a-z0-9._-]+/g,"-").replace(/-+/g,"-"); }
-async function isAdmin(user){ if(!user||!db)return false; const snap=await getDoc(doc(db,"admins",user.uid)); return snap.exists() && snap.data().active !== false; }
-async function readCollection(name){ const snap=await getDocs(collection(db,name)); return snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)); }
-async function loadAll(){ const [shows,videos,photos,settingsDoc]=await Promise.all([readCollection("shows"),readCollection("videos"),readCollection("photos"),getDoc(doc(db,"site","settings"))]); state={...state,shows,videos,photos,settings:settingsDoc.exists()?settingsDoc.data():{}}; renderAll(); }
-function renderAll(){ $("[data-count-shows]").textContent=state.shows.length; $("[data-count-videos]").textContent=state.videos.length; $("[data-count-photos]").textContent=state.photos.length; renderList("shows",state.shows); renderList("videos",state.videos); renderList("photos",state.photos); fillSettings(); }
-function renderList(type,items){ const target=$(`[data-${type.slice(0,-1)}-admin-list]`); if(!target)return; target.innerHTML=""; if(!items.length){target.innerHTML='<div class="admin-notice">No items yet.</div>';return;} items.forEach(item=>{const row=document.createElement("button");row.type="button";row.className="admin-list-item";const title=type==="shows"?(item.title||item.venue||"Untitled show"):type==="videos"?(item.title||"Untitled video"):(item.caption||"Untitled photo");const meta=type==="shows"?[item.date||item.displayDate,item.venue].filter(Boolean).join(" · "):type==="videos"?item.youtubeUrl:(item.alt||item.url);row.innerHTML=`<span><strong></strong><span></span></span><span class="badge ${item.published?'live':''}">${item.published?'Published':'Draft'}</span>`;row.querySelector("strong").textContent=title;row.querySelector("span span").textContent=meta||"No details";row.addEventListener("click",()=>fillForm(type.slice(0,-1),item));target.append(row);}); }
-function resetForm(type){ const form=$(`[data-${type}-form]`); form.reset(); form.elements.id.value=""; if(form.elements.order)form.elements.order.value=10; if(form.elements.published)form.elements.published.checked=true; $(`[data-${type}-form-title]`).textContent=`Add a ${type}`; $(`[data-delete-${type}]`).hidden=true; message(`[data-${type}-message]`,""); }
-function fillForm(type,item){ const form=$(`[data-${type}-form]`); resetForm(type); Object.entries(item).forEach(([key,value])=>{const field=form.elements[key];if(!field)return;if(field.type==="checkbox")field.checked=Boolean(value);else field.value=value??"";}); form.elements.id.value=item.id; $(`[data-${type}-form-title]`).textContent=`Edit ${type}`; $(`[data-delete-${type}]`).hidden=false; form.scrollIntoView({behavior:"smooth",block:"start"}); }
-function formObject(form){ const data=new FormData(form); const out={}; for(const [k,v] of data.entries()){ if(k==="file"||k==="id"||k==="currentUrl")continue; out[k]=v; } form.querySelectorAll('input[type="checkbox"]').forEach(i=>out[i.name]=i.checked); if("order" in out)out.order=Number(out.order)||10; return out; }
-async function saveDoc(type,form){ const id=form.elements.id.value; const payload=formObject(form); payload.updatedAt=new Date().toISOString(); if(id)await setDoc(doc(db,type,id),payload,{merge:true}); else await addDoc(collection(db,type),payload); await loadAll(); resetForm(type.slice(0,-1)); }
-function bindTabs(){ $$('[data-admin-tab]').forEach(btn=>btn.addEventListener("click",()=>{$$('[data-admin-tab]').forEach(b=>b.classList.toggle("active",b===btn));$$('[data-admin-panel]').forEach(p=>p.classList.toggle("active",p.dataset.adminPanel===btn.dataset.adminTab));})); }
-function bindShows(){ $('[data-new-show]').onclick=()=>resetForm("show"); const form=$('[data-show-form]');form.addEventListener("submit",async e=>{e.preventDefault();try{await saveDoc("shows",form);message('[data-show-message]',"Show saved.","success");}catch(err){console.error(err);message('[data-show-message]',"Unable to save the show.","error");}});$('[data-delete-show]').onclick=async()=>{const id=form.elements.id.value;if(id&&confirm("Delete this show?")){await deleteDoc(doc(db,"shows",id));await loadAll();resetForm("show");}}; }
-function bindVideos(){ $('[data-new-video]').onclick=()=>resetForm("video"); const form=$('[data-video-form]');form.addEventListener("submit",async e=>{e.preventDefault();try{await saveDoc("videos",form);message('[data-video-message]',"Video saved.","success");}catch(err){console.error(err);message('[data-video-message]',"Unable to save the video.","error");}});$('[data-delete-video]').onclick=async()=>{const id=form.elements.id.value;if(id&&confirm("Delete this video?")){await deleteDoc(doc(db,"videos",id));await loadAll();resetForm("video");}}; }
-async function uploadPhoto(file,progress){ const path=`public/photos/${Date.now()}-${safeFile(file.name)}`; const upload=uploadBytesResumable(ref(storage,path),file,{contentType:file.type}); progress.hidden=false; return new Promise((resolve,reject)=>upload.on("state_changed",snap=>{progress.querySelector("span").style.width=`${(snap.bytesTransferred/snap.totalBytes)*100}%`;},reject,async()=>resolve({url:await getDownloadURL(upload.snapshot.ref),storagePath:path}))); }
-function bindPhotos(){ const form=$('[data-photo-form]'); form.addEventListener("submit",async e=>{e.preventDefault();try{let payload=formObject(form);const file=form.elements.file.files[0];if(file){const uploaded=await uploadPhoto(file,$('[data-upload-progress]'));payload={...payload,...uploaded};}else{payload.url=form.elements.currentUrl.value;payload.storagePath=form.elements.storagePath.value;}if(!payload.url)throw new Error("Choose an image file.");payload.updatedAt=new Date().toISOString();const id=form.elements.id.value;if(id)await setDoc(doc(db,"photos",id),payload,{merge:true});else await addDoc(collection(db,"photos"),payload);await loadAll();resetForm("photo");$('[data-upload-progress]').hidden=true;message('[data-photo-message]',"Photo saved.","success");}catch(err){console.error(err);message('[data-photo-message]',err.message||"Unable to save the photo.","error");}});$('[data-delete-photo]').onclick=async()=>{const id=form.elements.id.value;if(id&&confirm("Delete this photo?")){const path=form.elements.storagePath.value;if(path){try{await deleteObject(ref(storage,path));}catch(err){console.warn(err);}}await deleteDoc(doc(db,"photos",id));await loadAll();resetForm("photo");}}; }
-function fillSettings(){const f=$('[data-settings-form]');Object.entries(state.settings).forEach(([k,v])=>{if(f.elements[k])f.elements[k].value=v??"";});}
-function bindSettings(){const f=$('[data-settings-form]');f.addEventListener("submit",async e=>{e.preventDefault();try{const payload=formObject(f);payload.updatedAt=new Date().toISOString();await setDoc(doc(db,"site","settings"),payload,{merge:true});state.settings={...state.settings,...payload};message('[data-settings-message]',"Settings saved.","success");}catch(err){console.error(err);message('[data-settings-message]',"Unable to save settings.","error");}});}
-async function seed(){if((state.shows.length||state.videos.length||state.photos.length)&&!confirm("Starter content will be added alongside existing items. Continue?"))return;const res=await fetch(new URL("../data/site-content.json",import.meta.url));const data=await res.json();const batch=writeBatch(db);batch.set(doc(db,"site","settings"),data.site,{merge:true});for(const name of ["shows","videos","photos"]){for(const item of data[name]){const id=item.id;const copy={...item};delete copy.id;batch.set(doc(db,name,id),copy,{merge:true});}}await batch.commit();await loadAll();message('[data-overview-message]',"Starter content loaded. Draft items remain hidden until published.","success");}
-async function start(user){state.user=user;$('[data-user-email]').textContent=user.email||"Signed in";if(!await isAdmin(user)){$('[data-admin-gate]').innerHTML='<h1>Access denied</h1><p>This account is signed in but is not listed in the Firestore <code>admins</code> collection.</p>';return;}$('[data-admin-gate]').hidden=true;$('[data-admin-app]').hidden=false;bindTabs();bindShows();bindVideos();bindPhotos();bindSettings();$('[data-seed-content]').onclick=()=>seed().catch(e=>{console.error(e);message('[data-overview-message]',"Unable to load starter content.","error")});await loadAll();}
-if(!firebaseEnabled){$('[data-admin-gate]').innerHTML='<h1>Firebase is not connected</h1><p>Follow <strong>FIREBASE-SETUP.md</strong>, then paste the web configuration into <code>js/firebase-config.js</code>.</p>';}else{onAuthStateChanged(auth,user=>{if(!user)window.location.replace("login.html");else start(user).catch(err=>{$('[data-admin-gate]').innerHTML=`<h1>Dashboard error</h1><p>${err.message}</p>`;});});$('[data-sign-out]').onclick=()=>signOut(auth).then(()=>window.location.replace("login.html"));}
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+let state = {
+  shows: [],
+  videos: [],
+  photos: [],
+  members: [],
+  settings: {},
+  user: null
+};
+
+function message(selector, text, type = "") {
+  const element = $(selector);
+  if (!element) return;
+  element.textContent = text;
+  element.className = `admin-message ${type}`;
+}
+
+function safeFile(name) {
+  return name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
+}
+
+async function isAdmin(user) {
+  if (!user || !db) return false;
+  const snapshot = await getDoc(doc(db, "admins", user.uid));
+  return snapshot.exists() && snapshot.data().active !== false;
+}
+
+async function readCollection(name) {
+  const snapshot = await getDocs(collection(db, name));
+  return snapshot.docs
+    .map((item) => ({ id: item.id, ...item.data() }))
+    .sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999));
+}
+
+async function loadAll() {
+  const [shows, videos, photos, members, settingsDoc] = await Promise.all([
+    readCollection("shows"),
+    readCollection("videos"),
+    readCollection("photos"),
+    readCollection("members"),
+    getDoc(doc(db, "site", "settings"))
+  ]);
+
+  state = {
+    ...state,
+    shows,
+    videos,
+    photos,
+    members,
+    settings: settingsDoc.exists() ? settingsDoc.data() : {}
+  };
+  renderAll();
+}
+
+function renderAll() {
+  $("[data-count-shows]").textContent = state.shows.length;
+  $("[data-count-videos]").textContent = state.videos.length;
+  $("[data-count-photos]").textContent = state.photos.length;
+  $("[data-count-members]").textContent = state.members.length;
+  renderList("shows", state.shows);
+  renderList("videos", state.videos);
+  renderList("photos", state.photos);
+  renderList("members", state.members);
+  fillSettings();
+}
+
+const listTargets = {
+  shows: "[data-show-admin-list]",
+  videos: "[data-video-admin-list]",
+  photos: "[data-photo-admin-list]",
+  members: "[data-member-admin-list]"
+};
+
+function listText(type, item) {
+  if (type === "shows") {
+    return {
+      title: item.title || item.venue || "Untitled show",
+      meta: [item.date || item.displayDate, item.venue].filter(Boolean).join(" · ")
+    };
+  }
+  if (type === "videos") return { title: item.title || "Untitled video", meta: item.youtubeUrl || "" };
+  if (type === "photos") return { title: item.caption || "Untitled photo", meta: item.alt || item.url || "" };
+  return { title: item.name || "Unnamed member", meta: item.role || "" };
+}
+
+function renderList(type, items) {
+  const target = $(listTargets[type]);
+  if (!target) return;
+  target.innerHTML = "";
+
+  if (!items.length) {
+    target.innerHTML = '<div class="admin-notice">No items yet.</div>';
+    return;
+  }
+
+  items.forEach((item) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "admin-list-item";
+    const text = listText(type, item);
+    row.innerHTML = '<span><strong></strong><span></span></span><span class="badge"></span>';
+    row.querySelector("strong").textContent = text.title;
+    row.querySelector("span span").textContent = text.meta || "No details";
+    const badge = row.querySelector(".badge");
+    badge.textContent = item.published ? "Published" : "Draft";
+    badge.classList.toggle("live", item.published === true);
+    row.addEventListener("click", () => fillForm(type, item));
+    target.append(row);
+  });
+}
+
+function setFormValue(form, name, value) {
+  const field = form.elements[name];
+  if (!field) return;
+  if (field.type === "checkbox") field.checked = Boolean(value);
+  else field.value = value ?? "";
+}
+
+function fillForm(type, item) {
+  const singular = type.slice(0, -1);
+  const form = $(`[data-${singular}-form]`);
+  if (!form) return;
+
+  form.reset();
+  setFormValue(form, "id", item.id);
+  Object.entries(item).forEach(([key, value]) => setFormValue(form, key, value));
+
+  if (type === "photos") {
+    setFormValue(form, "currentUrl", item.url);
+    setFormValue(form, "storagePath", item.storagePath);
+  }
+  if (type === "members") {
+    setFormValue(form, "currentPhotoUrl", item.photoUrl);
+    setFormValue(form, "storagePath", item.storagePath);
+  }
+
+  $(`[data-${singular}-form-title]`).textContent = `Edit ${type === "members" ? "member" : singular}`;
+  $(`[data-delete-${singular}]`).hidden = false;
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function resetForm(type) {
+  const form = $(`[data-${type}-form]`);
+  if (!form) return;
+  form.reset();
+  if (form.elements.id) form.elements.id.value = "";
+  if (form.elements.currentUrl) form.elements.currentUrl.value = "";
+  if (form.elements.currentPhotoUrl) form.elements.currentPhotoUrl.value = "";
+  if (form.elements.storagePath) form.elements.storagePath.value = "";
+  const title = $(`[data-${type}-form-title]`);
+  if (title) title.textContent = `Add a ${type}`;
+  const deleteButton = $(`[data-delete-${type}]`);
+  if (deleteButton) deleteButton.hidden = true;
+}
+
+function formObject(form) {
+  const payload = {};
+  [...form.elements].forEach((field) => {
+    if (!field.name || ["id", "file", "currentUrl", "currentPhotoUrl", "storagePath"].includes(field.name)) return;
+    if (field.type === "checkbox") payload[field.name] = field.checked;
+    else if (field.type === "number") payload[field.name] = Number(field.value) || 0;
+    else payload[field.name] = field.value.trim();
+  });
+  return payload;
+}
+
+function bindTabs() {
+  $$("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      $$("[data-admin-tab]").forEach((item) => item.classList.remove("active"));
+      $$("[data-admin-panel]").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      $(`[data-admin-panel="${button.dataset.adminTab}"]`)?.classList.add("active");
+    });
+  });
+}
+
+function bindSimpleCollection(type, collectionName) {
+  const form = $(`[data-${type}-form]`);
+  const newButton = $(`[data-new-${type}]`);
+  const deleteButton = $(`[data-delete-${type}]`);
+  if (!form) return;
+
+  newButton?.addEventListener("click", () => resetForm(type));
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      const payload = formObject(form);
+      payload.updatedAt = new Date().toISOString();
+      const id = form.elements.id.value;
+      if (id) await setDoc(doc(db, collectionName, id), payload, { merge: true });
+      else await addDoc(collection(db, collectionName), payload);
+      await loadAll();
+      resetForm(type);
+      message(`[data-${type}-message]`, `${type[0].toUpperCase()}${type.slice(1)} saved.`, "success");
+    } catch (error) {
+      console.error(error);
+      message(`[data-${type}-message]`, error.message || "Unable to save.", "error");
+    }
+  });
+
+  deleteButton?.addEventListener("click", async () => {
+    const id = form.elements.id.value;
+    if (!id || !confirm(`Delete this ${type}?`)) return;
+    await deleteDoc(doc(db, collectionName, id));
+    await loadAll();
+    resetForm(type);
+  });
+}
+
+async function uploadImage(file, folder, progressSelector) {
+  const progress = $(progressSelector);
+  const bar = progress?.querySelector("span");
+  if (progress) progress.hidden = false;
+  if (bar) bar.style.width = "0%";
+
+  const path = `${folder}/${Date.now()}-${safeFile(file.name)}`;
+  const storageRef = ref(storage, path);
+  const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
+
+  await new Promise((resolve, reject) => {
+    task.on(
+      "state_changed",
+      (snapshot) => {
+        if (bar) bar.style.width = `${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`;
+      },
+      reject,
+      resolve
+    );
+  });
+
+  return { url: await getDownloadURL(task.snapshot.ref), storagePath: path };
+}
+
+function bindPhotos() {
+  const form = $("[data-photo-form]");
+  if (!form) return;
+
+  $("[data-new-photo]")?.addEventListener("click", () => resetForm("photo"));
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      let payload = formObject(form);
+      const file = form.elements.file.files[0];
+      if (file) {
+        const uploaded = await uploadImage(file, "public/photos", "[data-photo-upload-progress]");
+        payload = { ...payload, ...uploaded };
+      } else {
+        payload.url = form.elements.currentUrl.value;
+        payload.storagePath = form.elements.storagePath.value;
+      }
+      if (!payload.url) throw new Error("Choose an image file.");
+      payload.updatedAt = new Date().toISOString();
+
+      const id = form.elements.id.value;
+      if (id) await setDoc(doc(db, "photos", id), payload, { merge: true });
+      else await addDoc(collection(db, "photos"), payload);
+
+      await loadAll();
+      resetForm("photo");
+      $("[data-photo-upload-progress]").hidden = true;
+      message("[data-photo-message]", "Photo saved.", "success");
+    } catch (error) {
+      console.error(error);
+      message("[data-photo-message]", error.message || "Unable to save the photo.", "error");
+    }
+  });
+
+  $("[data-delete-photo]")?.addEventListener("click", async () => {
+    const id = form.elements.id.value;
+    if (!id || !confirm("Delete this photo?")) return;
+    const path = form.elements.storagePath.value;
+    if (path) {
+      try { await deleteObject(ref(storage, path)); } catch (error) { console.warn(error); }
+    }
+    await deleteDoc(doc(db, "photos", id));
+    await loadAll();
+    resetForm("photo");
+  });
+}
+
+function bindMembers() {
+  const form = $("[data-member-form]");
+  if (!form) return;
+
+  $("[data-new-member]")?.addEventListener("click", () => resetForm("member"));
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      let payload = formObject(form);
+      const file = form.elements.file.files[0];
+      if (file) {
+        const uploaded = await uploadImage(file, "public/members", "[data-member-upload-progress]");
+        payload.photoUrl = uploaded.url;
+        payload.storagePath = uploaded.storagePath;
+      } else {
+        payload.photoUrl = form.elements.currentPhotoUrl.value;
+        payload.storagePath = form.elements.storagePath.value;
+      }
+      if (!payload.photoUrl) throw new Error("Choose a member photo.");
+      payload.updatedAt = new Date().toISOString();
+
+      const id = form.elements.id.value;
+      if (id) await setDoc(doc(db, "members", id), payload, { merge: true });
+      else await addDoc(collection(db, "members"), payload);
+
+      await loadAll();
+      resetForm("member");
+      $("[data-member-upload-progress]").hidden = true;
+      message("[data-member-message]", "Member saved.", "success");
+    } catch (error) {
+      console.error(error);
+      message("[data-member-message]", error.message || "Unable to save the member.", "error");
+    }
+  });
+
+  $("[data-delete-member]")?.addEventListener("click", async () => {
+    const id = form.elements.id.value;
+    if (!id || !confirm("Delete this member?")) return;
+    const path = form.elements.storagePath.value;
+    if (path) {
+      try { await deleteObject(ref(storage, path)); } catch (error) { console.warn(error); }
+    }
+    await deleteDoc(doc(db, "members", id));
+    await loadAll();
+    resetForm("member");
+  });
+}
+
+function fillSettings() {
+  const form = $("[data-settings-form]");
+  Object.entries(state.settings).forEach(([key, value]) => {
+    if (form.elements[key]) form.elements[key].value = value ?? "";
+  });
+}
+
+function bindSettings() {
+  const form = $("[data-settings-form]");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      const payload = formObject(form);
+      payload.updatedAt = new Date().toISOString();
+      await setDoc(doc(db, "site", "settings"), payload, { merge: true });
+      state.settings = { ...state.settings, ...payload };
+      message("[data-settings-message]", "Settings saved.", "success");
+    } catch (error) {
+      console.error(error);
+      message("[data-settings-message]", "Unable to save settings.", "error");
+    }
+  });
+}
+
+async function seed() {
+  const hasContent = state.shows.length || state.videos.length || state.photos.length || state.members.length;
+  if (hasContent && !confirm("Starter content will be added alongside existing items. Continue?")) return;
+
+  const response = await fetch(new URL("../data/site-content.json", import.meta.url));
+  const data = await response.json();
+  const batch = writeBatch(db);
+  batch.set(doc(db, "site", "settings"), data.site, { merge: true });
+
+  for (const name of ["shows", "videos", "photos", "members"]) {
+    for (const item of data[name] || []) {
+      const copy = { ...item };
+      delete copy.id;
+      batch.set(doc(db, name, item.id), copy, { merge: true });
+    }
+  }
+
+  await batch.commit();
+  await loadAll();
+  message("[data-overview-message]", "Starter content loaded.", "success");
+}
+
+async function start(user) {
+  state.user = user;
+  $("[data-user-email]").textContent = user.email || "Signed in";
+
+  if (!await isAdmin(user)) {
+    $("[data-admin-gate]").innerHTML = '<h1>Access denied</h1><p>This account is not listed in the Firestore <code>admins</code> collection.</p>';
+    return;
+  }
+
+  $("[data-admin-gate]").hidden = true;
+  $("[data-admin-app]").hidden = false;
+  bindTabs();
+  bindSimpleCollection("show", "shows");
+  bindSimpleCollection("video", "videos");
+  bindPhotos();
+  bindMembers();
+  bindSettings();
+  $("[data-seed-content]").addEventListener("click", () => seed().catch((error) => {
+    console.error(error);
+    message("[data-overview-message]", "Unable to load starter content.", "error");
+  }));
+  await loadAll();
+}
+
+if (!firebaseEnabled) {
+  $("[data-admin-gate]").innerHTML = '<h1>Firebase is not connected</h1><p>Follow <strong>FIREBASE-SETUP.md</strong>, then paste the web configuration into <code>js/firebase-config.js</code>.</p>';
+} else {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) window.location.replace("login.html");
+    else start(user).catch((error) => {
+      $("[data-admin-gate]").innerHTML = `<h1>Dashboard error</h1><p>${error.message}</p>`;
+    });
+  });
+  $("[data-sign-out]").addEventListener("click", () => signOut(auth).then(() => window.location.replace("login.html")));
+}

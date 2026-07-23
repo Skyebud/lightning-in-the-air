@@ -2,13 +2,13 @@
 
 Public pages:
 - Home
-- The Band
+- The Band, with clickable member profiles
 - Shows, featuring past performances
 - Media, with embedded YouTube videos and a photo gallery
 - Calendar, for upcoming dates
 - Booking
 
-The public site reads content from Firebase when configured and falls back to `data/site-content.json` before Firebase is connected. The `/admin/` area is not linked from the public website and is blocked from search indexing.
+The public site reads shows, videos, photos, settings, and member stories from Firebase when configured and falls back to `data/site-content.json` before Firebase is connected. The `/admin/` area is not linked from the public website and is blocked from search indexing.
 
 ## Previewing locally
 

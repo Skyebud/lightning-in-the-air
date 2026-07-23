@@ -27,7 +27,7 @@ The public website works immediately from the local `data/site-content.json` fil
 1. Create the default Storage bucket.
 2. In **Rules**, replace the rules with the contents of `storage.rules`, then publish.
 
-Cloud Storage may require billing to be enabled depending on the Firebase project's current plan and bucket configuration. The public site still works without Storage; only photo uploads in the dashboard require it.
+Cloud Storage may require billing to be enabled depending on the Firebase project's current plan and bucket configuration. The public site still works without Storage; only gallery and band-member photo uploads in the dashboard require it.
 
 ## 3. Authorize the account as an administrator
 
@@ -47,7 +47,7 @@ The UID document is what the Firestore and Storage rules use to decide who may e
 2. Open `admin/login.html` on the deployed website.
 3. Sign in with the administrator account.
 4. Select **Load starter content** on the dashboard.
-5. The existing videos, settings, and photo references will be copied into Firestore.
+5. The existing videos, settings, photo references, and band-member profiles will be copied into Firestore.
 
 The MadLife listing is intentionally seeded as a draft because the year and ticket link have not been confirmed.
 

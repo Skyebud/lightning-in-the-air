@@ -1,17 +1,13 @@
 {
   "site": {
     "announcement": "Now booking 2026–2027",
-    "heroEyebrow": "A Marshall Tucker Band Tribute",
-    "heroTitle": "Live Southern Rock.",
-    "heroText": "The songs. The sound. The show.",
-    "bookingContact": "The Band",
     "bookingEmail": "lita.bhm@gmail.com",
     "bookingPhone": "205-369-2325",
     "youtubeUrl": "https://www.youtube.com/@LightningintheAir",
     "facebookUrl": "",
     "instagramUrl": "",
-    "homeQuote": "They put on a quality show, treat people right, and leave audiences wanting just one more song.",
-    "homeQuoteBy": "Greg Stone · Executive Director, Shelby County Arts Council"
+    "homeQuote": "A group that truly delivers.",
+    "homeQuoteBy": "Greg Stone · Shelby County Arts Council"
   },
   "shows": [
     {
@@ -33,7 +29,7 @@
   "videos": [
     {
       "id": "promo",
-      "title": "Official Lightning in the Air Tribute Promo",
+      "title": "Lightning in the Air",
       "youtubeUrl": "https://www.youtube.com/watch?v=C7-L9rXvx_E",
       "description": "",
       "featured": true,
@@ -51,7 +47,7 @@
     },
     {
       "id": "bob-away-my-blues",
-      "title": "Bob Away My Blues at Elysian Gardens",
+      "title": "Bob Away My Blues",
       "youtubeUrl": "https://www.youtube.com/watch?v=aNBCM6lxMmQ",
       "description": "",
       "featured": false,
@@ -77,12 +73,84 @@
       "order": 5
     }
   ],
+  "members": [
+    {
+      "id": "tom-howle",
+      "name": "Tom Howle",
+      "role": "Guitar",
+      "photoUrl": "assets/images/members/tom-howle.webp",
+      "photoAlt": "Tom Howle playing guitar with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 1
+    },
+    {
+      "id": "ben-benefield",
+      "name": "Ben Benefield",
+      "role": "Vocals · Guitar · Percussion",
+      "photoUrl": "assets/images/members/ben-benefield.webp",
+      "photoAlt": "Ben Benefield performing with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 2
+    },
+    {
+      "id": "taylor-goodwin",
+      "name": "Taylor Goodwin",
+      "role": "Guitar",
+      "photoUrl": "assets/images/members/taylor-goodwin.webp",
+      "photoAlt": "Taylor Goodwin playing guitar with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 3
+    },
+    {
+      "id": "jaymes-tunnell",
+      "name": "Jaymes Tunnell",
+      "role": "Bass",
+      "photoUrl": "assets/images/members/jaymes-tunnell.webp",
+      "photoAlt": "Jaymes Tunnell playing bass with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 4
+    },
+    {
+      "id": "elliot-margolies",
+      "name": "Elliot Margolies",
+      "role": "Keys",
+      "photoUrl": "assets/images/members/elliot-margolies.webp",
+      "photoAlt": "Elliot Margolies playing keys with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 5
+    },
+    {
+      "id": "sergio-flores",
+      "name": "Sergio Flores",
+      "role": "Sax · Flute",
+      "photoUrl": "assets/images/members/sergio-flores.webp",
+      "photoAlt": "Sergio Flores playing saxophone with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 6
+    },
+    {
+      "id": "james-patton",
+      "name": "James Patton",
+      "role": "Drums",
+      "photoUrl": "assets/images/members/james-patton.webp",
+      "photoAlt": "James Patton playing drums with Lightning in the Air",
+      "story": "",
+      "published": true,
+      "order": 7
+    }
+  ],
   "photos": [
     {
       "id": "group",
       "url": "assets/images/band-full.webp",
       "alt": "The members of Lightning in the Air standing together onstage",
-      "caption": "Lightning in the Air — A Marshall Tucker Tribute",
+      "caption": "Lightning in the Air",
       "featured": true,
       "published": true,
       "order": 1
@@ -91,70 +159,70 @@
       "id": "stage",
       "url": "assets/images/live-stage.webp",
       "alt": "Lightning in the Air performing live onstage",
-      "caption": "The full band live onstage",
+      "caption": "Live onstage",
       "featured": false,
       "published": true,
       "order": 2
     },
     {
       "id": "guitar-one",
-      "url": "assets/images/lead-guitar-left.webp",
-      "alt": "Guitarist performing live with Lightning in the Air",
-      "caption": "Live guitar",
+      "url": "assets/images/members/tom-howle.webp",
+      "alt": "Tom Howle playing guitar",
+      "caption": "Tom Howle",
       "featured": false,
       "published": true,
       "order": 3
     },
     {
       "id": "vocals",
-      "url": "assets/images/ben-benfield.webp",
-      "alt": "Lead vocalist and acoustic guitarist performing live",
-      "caption": "Lead vocals and acoustic guitar",
+      "url": "assets/images/members/ben-benefield.webp",
+      "alt": "Ben Benefield performing live",
+      "caption": "Ben Benefield",
       "featured": false,
       "published": true,
       "order": 4
     },
     {
       "id": "guitar-two",
-      "url": "assets/images/taylor-goodwin.webp",
-      "alt": "Guitarist performing live with Lightning in the Air",
-      "caption": "Live guitar",
+      "url": "assets/images/members/taylor-goodwin.webp",
+      "alt": "Taylor Goodwin playing guitar",
+      "caption": "Taylor Goodwin",
       "featured": false,
       "published": true,
       "order": 5
     },
     {
       "id": "bass",
-      "url": "assets/images/jay-bass.webp",
-      "alt": "Bass guitarist performing live with Lightning in the Air",
-      "caption": "Bass and vocals",
+      "url": "assets/images/members/jaymes-tunnell.webp",
+      "alt": "Jaymes Tunnell playing bass",
+      "caption": "Jaymes Tunnell",
       "featured": false,
       "published": true,
       "order": 6
     },
     {
       "id": "keys",
-      "url": "assets/images/elliot-keys.webp",
-      "alt": "Keyboard player performing live with Lightning in the Air",
-      "caption": "Keyboards",
+      "url": "assets/images/members/elliot-margolies.webp",
+      "alt": "Elliot Margolies playing keys",
+      "caption": "Elliot Margolies",
       "featured": false,
       "published": true,
       "order": 7
     },
     {
       "id": "sax",
-      "url": "assets/images/sergio-sax.webp",
-      "alt": "Saxophone player performing live with Lightning in the Air",
-      "caption": "Saxophone and flute",
+      "url": "assets/images/members/sergio-flores.webp",
+      "alt": "Sergio Flores playing saxophone",
+      "caption": "Sergio Flores",
       "featured": false,
       "published": true,
       "order": 8
     },
     {
       "id": "drums",
-      "url": "assets/images/james-drums.webp",
-      "alt": "Drummer performing live with Lightning in the Air",
-      "caption": "Drums",
+      "url": "assets/images/members/james-patton.webp",
+      "alt": "James Patton playing drums",
+      "caption": "James Patton",
       "featured": false,
       "published": true,
       "order": 9

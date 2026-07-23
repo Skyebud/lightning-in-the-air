@@ -1,60 +1,71 @@
-import { getSettings, getShows, getVideos, getPhotos, youtubeId } from "./content-store.js";
+import {
+  getSettings,
+  getShows,
+  getVideos,
+  getPhotos,
+  getMembers,
+  youtubeId
+} from "./content-store.js";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 function setText(selector, value) {
-  $$(selector).forEach((el) => {
-    if (value !== undefined && value !== null) el.textContent = value;
+  $$(selector).forEach((element) => {
+    if (value !== undefined && value !== null) element.textContent = value;
   });
 }
+
 function setLink(selector, url) {
-  $$(selector).forEach((el) => {
+  $$(selector).forEach((element) => {
     if (url) {
-      el.href = url;
-      el.hidden = false;
+      element.href = url;
+      element.hidden = false;
     } else {
-      el.removeAttribute("href");
-      el.hidden = true;
+      element.removeAttribute("href");
+      element.hidden = true;
     }
   });
 }
+
 function phoneHref(value = "") {
   return `tel:${value.replace(/[^+\d]/g, "")}`;
 }
+
 function youtubeWatchUrl(video) {
   const id = youtubeId(video.youtubeUrl);
   return id ? `https://www.youtube.com/watch?v=${id}` : video.youtubeUrl;
 }
+
 function embedUrl(video) {
   const id = youtubeId(video.youtubeUrl);
   if (!id) return "";
-  const params = new URLSearchParams({ rel: "0", playsinline: "1" });
-  if (["http:", "https:"].includes(window.location.protocol)) {
-    params.set("origin", window.location.origin);
-  }
-  return `https://www.youtube.com/embed/${id}?${params.toString()}`;
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`;
 }
+
 function createVideoPlayer(video, eager = false) {
   const id = youtubeId(video.youtubeUrl);
   const wrapper = document.createElement("div");
   wrapper.className = "video-player";
 
-  // YouTube requires a web-page referrer. A local file preview cannot provide one,
-  // so use a clean poster instead of showing a broken player.
+  if (!id) return wrapper;
+
   if (window.location.protocol === "file:") {
     const link = document.createElement("a");
     link.className = "video-poster";
     link.href = youtubeWatchUrl(video);
     link.target = "_blank";
     link.rel = "noopener";
+
     const image = document.createElement("img");
     image.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
     image.alt = video.title;
+
     const play = document.createElement("span");
     play.className = "play-button";
     play.setAttribute("aria-hidden", "true");
     play.textContent = "▶";
+
     link.append(image, play);
     wrapper.append(link);
     return wrapper;
@@ -70,10 +81,12 @@ function createVideoPlayer(video, eager = false) {
   wrapper.append(frame);
   return wrapper;
 }
+
 function createVideoCard(video, className = "video-card") {
   const article = document.createElement("article");
   article.className = className;
   article.append(createVideoPlayer(video));
+
   const copy = document.createElement("div");
   copy.className = className === "performance-card" ? "performance-copy" : "video-card-copy";
   const title = document.createElement("h3");
@@ -82,15 +95,22 @@ function createVideoCard(video, className = "video-card") {
   article.append(copy);
   return article;
 }
+
 function parseShowDate(show) {
   return show.date ? new Date(`${show.date}T12:00:00`) : null;
 }
+
 function formatDate(show) {
   if (show.displayDate) return show.displayDate;
   const date = parseShowDate(show);
   if (!date) return "Date TBA";
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(date);
 }
+
 function isUpcoming(show) {
   const date = parseShowDate(show);
   if (!date) return false;
@@ -98,19 +118,27 @@ function isUpcoming(show) {
   today.setHours(0, 0, 0, 0);
   return date >= today;
 }
+
 function showCard(show) {
   const article = document.createElement("article");
   article.className = "show-card";
+
   const date = document.createElement("div");
   date.className = "show-date";
   date.textContent = formatDate(show);
+
   const copy = document.createElement("div");
   const title = document.createElement("h3");
   title.textContent = show.title || show.venue || "Lightning in the Air";
   const meta = document.createElement("p");
-  meta.textContent = [show.time, show.venue, [show.city, show.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
+  meta.textContent = [
+    show.time,
+    show.venue,
+    [show.city, show.state].filter(Boolean).join(", ")
+  ].filter(Boolean).join(" · ");
   copy.append(title);
   if (meta.textContent) copy.append(meta);
+
   const action = document.createElement("a");
   action.className = "button dark";
   if (show.ticketUrl) {
@@ -122,48 +150,111 @@ function showCard(show) {
     action.href = "calendar.html";
     action.textContent = "Details";
   }
+
   article.append(date, copy, action);
   return article;
 }
+
 function emptyShows() {
-  const div = document.createElement("div");
-  div.className = "empty-state";
+  const box = document.createElement("div");
+  box.className = "empty-state";
   const title = document.createElement("h3");
   title.textContent = "New dates coming soon.";
-  div.append(title);
-  return div;
+  box.append(title);
+  return box;
 }
+
 function setupGallery(photos) {
   const main = $("[data-gallery-main]");
   const thumbs = $("[data-gallery-thumbs]");
   if (!main || !thumbs || !photos.length) return;
+
   const mainImage = $("img", main);
   const caption = $("[data-gallery-caption]", main);
   let index = 0;
+
   function render(next) {
     index = (next + photos.length) % photos.length;
     const photo = photos[index];
     mainImage.src = photo.url;
     mainImage.alt = photo.alt || photo.caption || "Lightning in the Air";
     caption.textContent = photo.caption || "";
-    $$(".gallery-thumb", thumbs).forEach((button, i) => button.classList.toggle("active", i === index));
+    $$(".gallery-thumb", thumbs).forEach((button, itemIndex) => {
+      button.classList.toggle("active", itemIndex === index);
+    });
   }
-  photos.forEach((photo, i) => {
+
+  photos.forEach((photo, itemIndex) => {
     const button = document.createElement("button");
     button.className = "gallery-thumb";
     button.type = "button";
-    button.setAttribute("aria-label", `Show photo ${i + 1}`);
+    button.setAttribute("aria-label", `Show photo ${itemIndex + 1}`);
+
     const image = document.createElement("img");
     image.src = photo.url;
     image.alt = "";
     image.loading = "lazy";
     button.append(image);
-    button.addEventListener("click", () => render(i));
+    button.addEventListener("click", () => render(itemIndex));
     thumbs.append(button);
   });
+
   $("[data-gallery-prev]")?.addEventListener("click", () => render(index - 1));
   $("[data-gallery-next]")?.addEventListener("click", () => render(index + 1));
   render(0);
+}
+
+function setupMembers(members) {
+  const grid = $("[data-member-grid]");
+  const dialog = $("[data-member-dialog]");
+  if (!grid || !members.length) return;
+
+  const dialogImage = dialog ? $("[data-member-dialog-image]", dialog) : null;
+  const dialogName = dialog ? $("[data-member-dialog-name]", dialog) : null;
+  const dialogRole = dialog ? $("[data-member-dialog-role]", dialog) : null;
+  const dialogStory = dialog ? $("[data-member-dialog-story]", dialog) : null;
+
+  function openMember(member) {
+    if (!dialog) return;
+    dialogImage.src = member.photoUrl;
+    dialogImage.alt = member.photoAlt || member.name;
+    dialogName.textContent = member.name;
+    dialogRole.textContent = member.role;
+    dialogStory.textContent = member.story?.trim() || `More about ${member.name} coming soon.`;
+    dialog.showModal();
+  }
+
+  members.forEach((member) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "member-card";
+    button.setAttribute("aria-label", `Meet ${member.name}`);
+
+    const imageWrap = document.createElement("span");
+    imageWrap.className = "member-photo";
+    const image = document.createElement("img");
+    image.src = member.photoUrl;
+    image.alt = member.photoAlt || member.name;
+    image.loading = "lazy";
+    imageWrap.append(image);
+
+    const copy = document.createElement("span");
+    copy.className = "member-copy";
+    const name = document.createElement("strong");
+    name.textContent = member.name;
+    const role = document.createElement("span");
+    role.textContent = member.role;
+    copy.append(name, role);
+
+    button.append(imageWrap, copy);
+    button.addEventListener("click", () => openMember(member));
+    grid.append(button);
+  });
+
+  $("[data-member-dialog-close]", dialog)?.addEventListener("click", () => dialog.close());
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
 }
 
 function setupCalendar(shows) {
@@ -175,14 +266,19 @@ function setupCalendar(shows) {
   const datedShows = shows.filter((show) => parseShowDate(show));
   const upcoming = datedShows.filter(isUpcoming);
   const firstDate = parseShowDate(upcoming[0]);
-  let cursor = firstDate ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  let cursor = firstDate
+    ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1)
+    : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-  function monthKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-  }
+  const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
   function renderMonth() {
     grid.innerHTML = "";
-    label.textContent = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(cursor);
+    label.textContent = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric"
+    }).format(cursor);
+
     const year = cursor.getFullYear();
     const month = cursor.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
@@ -196,6 +292,7 @@ function setupCalendar(shows) {
       const box = document.createElement("div");
       box.className = "calendar-day";
       let date;
+
       if (day < 1) {
         box.classList.add("outside");
         date = new Date(year, month - 1, previousDays + day);
@@ -205,10 +302,12 @@ function setupCalendar(shows) {
       } else {
         date = new Date(year, month, day);
       }
+
       const number = document.createElement("span");
       number.className = "calendar-number";
       number.textContent = String(date.getDate());
       box.append(number);
+
       if (date.toDateString() === today.toDateString()) box.classList.add("today");
 
       if (monthKey(date) === currentMonthKey) {
@@ -225,6 +324,7 @@ function setupCalendar(shows) {
           box.append(event);
         });
       }
+
       grid.append(box);
     }
   }
@@ -241,6 +341,7 @@ function setupCalendar(shows) {
     cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
     renderMonth();
   });
+
   renderMonth();
 }
 
@@ -259,18 +360,16 @@ async function init() {
 
   const settings = await getSettings();
   setText("[data-announcement]", settings.announcement);
-  setText("[data-hero-eyebrow]", settings.heroEyebrow);
-  setText("[data-hero-title]", settings.heroTitle);
-  setText("[data-hero-text]", settings.heroText);
   setText("[data-home-quote]", `“${settings.homeQuote}”`);
   setText("[data-home-quote-by]", settings.homeQuoteBy);
-  $$('[data-booking-email]').forEach((el) => {
-    el.textContent = settings.bookingEmail;
-    el.href = `mailto:${settings.bookingEmail}`;
+
+  $$("[data-booking-email]").forEach((element) => {
+    element.textContent = settings.bookingEmail;
+    element.href = `mailto:${settings.bookingEmail}`;
   });
-  $$('[data-booking-phone]').forEach((el) => {
-    el.textContent = settings.bookingPhone;
-    el.href = phoneHref(settings.bookingPhone);
+  $$("[data-booking-phone]").forEach((element) => {
+    element.textContent = settings.bookingPhone;
+    element.href = phoneHref(settings.bookingPhone);
   });
   setLink("[data-youtube-link]", settings.youtubeUrl);
 
@@ -282,23 +381,30 @@ async function init() {
   if (page === "home") {
     const feature = $("[data-featured-video]");
     if (feature && featured) feature.append(createVideoPlayer(featured, true));
+
     const preview = $("[data-show-preview]");
     if (preview) {
       if (upcoming.length) upcoming.slice(0, 2).forEach((show) => preview.append(showCard(show)));
       else preview.append(emptyShows());
     }
   }
+
+  if (page === "about") setupMembers(await getMembers());
+
   if (page === "shows") {
     const performances = $("[data-performance-grid]");
     liveVideos.forEach((video) => performances?.append(createVideoCard(video, "performance-card")));
   }
+
   if (page === "media") {
     const feature = $("[data-media-feature]");
     if (feature && featured) feature.append(createVideoPlayer(featured, true));
+
     const videoGrid = $("[data-video-grid]");
     liveVideos.forEach((video) => videoGrid?.append(createVideoCard(video)));
     setupGallery(await getPhotos());
   }
+
   if (page === "calendar") setupCalendar(shows);
 
   const form = $("[data-booking-form]");

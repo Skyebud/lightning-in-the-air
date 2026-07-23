@@ -23,45 +23,47 @@
       <a href="index.html" data-nav="home">Home</a>
       <a href="about.html" data-nav="about">The Band</a>
       <a href="shows.html" data-nav="shows">Shows</a>
-      <a href="media.html" data-nav="media">Media</a>
       <a href="calendar.html" data-nav="calendar">Calendar</a>
+      <a href="media.html" data-nav="media">Media</a>
       <a class="nav-book" href="booking.html" data-nav="booking">Book the Band</a>
     </nav>
   </div>
 </header>
 <main id="main-content">
   <section class="home-hero">
-    <div class="hero-photo"><img src="assets/images/band-full.webp" alt="Lightning in the Air together onstage"></div>
-    <div class="hero-panel">
-      <div class="container hero-panel-inner">
-        <img class="hero-logo" src="assets/images/logo-transparent.webp" alt="Lightning in the Air — A Marshall Tucker Tribute">
-        <div class="hero-copy">
-          <p class="eyebrow" data-hero-eyebrow>A Marshall Tucker Band Tribute</p>
-          <h1 data-hero-title>Live Southern Rock.</h1>
-          <p data-hero-text>The songs. The sound. The show.</p>
-          <div class="button-row"><a class="button primary" href="#watch">Watch</a><a class="button secondary" href="calendar.html">See dates</a><a class="button secondary" href="booking.html">Book the band</a></div>
+    <div class="hero-photo">
+      <img src="assets/images/band-full.webp" alt="Lightning in the Air together onstage">
+      <div class="hero-actions">
+        <p>A Marshall Tucker Tribute</p>
+        <div class="button-row">
+          <a class="button primary" href="calendar.html">See shows</a>
+          <a class="button secondary" href="booking.html">Book the band</a>
         </div>
       </div>
+      <img class="hero-corner-logo" src="assets/images/logo-transparent.webp" alt="Lightning in the Air">
     </div>
   </section>
 
   <section class="section" id="watch">
-    <div class="container video-feature-grid">
-      <div class="video-shell"><span class="video-ribbon">Official promo</span><div data-featured-video></div></div>
-      <div class="video-copy"><p class="eyebrow">Watch</p><h2>Hear the band.</h2><div class="button-row"><a class="button primary" href="media.html">More videos</a></div></div>
+    <div class="container feature-video-section">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">Live</p><h2>See the show.</h2></div>
+        <a class="text-link yellow" href="media.html">More video →</a>
+      </div>
+      <div class="video-shell"><div data-featured-video></div></div>
     </div>
   </section>
 
   <section class="section paper">
-    <div class="container stage-split">
-      <figure class="stage-photo"><img src="assets/images/live-stage.webp" alt="Lightning in the Air performing live onstage"></figure>
-      <div class="stage-copy"><blockquote data-home-quote>“They put on a quality show, treat people right, and leave audiences wanting just one more song.”</blockquote><cite data-home-quote-by>Greg Stone · Shelby County Arts Council</cite></div>
+    <div class="container home-quote-grid">
+      <blockquote data-home-quote>“A group that truly delivers.”</blockquote>
+      <cite data-home-quote-by>Greg Stone · Shelby County Arts Council</cite>
     </div>
   </section>
 
   <section class="section blue">
     <div class="container">
-      <div class="section-heading"><div><p class="eyebrow">Calendar</p><h2>See them live.</h2></div><a class="text-link yellow" href="calendar.html">Full calendar →</a></div>
+      <div class="section-heading compact-heading"><div><p class="eyebrow">Calendar</p><h2>Coming up.</h2></div><a class="text-link yellow" href="calendar.html">Full calendar →</a></div>
       <div class="show-preview" data-show-preview></div>
     </div>
   </section>
@@ -70,11 +72,11 @@
 </main>
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div class="footer-brand"><a class="brand" href="index.html"><img src="assets/icons/bolt.svg" alt=""><span><strong>Lightning in the Air</strong><small>A Marshall Tucker Tribute</small></span></a><p>Southern rock, live.</p></div>
-    <div><h2>Explore</h2><nav><a href="about.html">The Band</a><a href="shows.html">Shows</a><a href="media.html">Media</a><a href="calendar.html">Calendar</a></nav></div>
+    <div class="footer-brand"><a class="brand" href="index.html"><img src="assets/icons/bolt.svg" alt=""><span><strong>Lightning in the Air</strong><small>A Marshall Tucker Tribute</small></span></a></div>
+    <div><h2>Explore</h2><nav><a href="about.html">The Band</a><a href="shows.html">Shows</a><a href="calendar.html">Calendar</a><a href="media.html">Media</a></nav></div>
     <div><h2>Booking</h2><nav><a data-booking-email href="mailto:lita.bhm@gmail.com">lita.bhm@gmail.com</a><a data-booking-phone href="tel:+12053692325">205-369-2325</a><a href="booking.html">Send an inquiry</a></nav></div>
   </div>
-  <div class="container footer-bottom"><span>© <span data-year></span> Lightning in the Air.</span><span>A Marshall Tucker Band tribute.</span></div>
+  <div class="container footer-bottom"><span>© <span data-year></span> Lightning in the Air.</span></div>
 </footer>
 <script type="module" src="js/public-site.js"></script>
 </body>

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#06102f">
-  <meta name="description" content="Meet Lightning in the Air, a Marshall Tucker Band tribute from Alabama.">
+  <meta name="description" content="Meet the members of Lightning in the Air.">
   <meta property="og:title" content="The Band | Lightning in the Air">
-  <meta property="og:description" content="Meet Lightning in the Air, a Marshall Tucker Band tribute from Alabama.">
+  <meta property="og:description" content="Meet the members of Lightning in the Air.">
   <meta property="og:image" content="assets/images/band-full.webp">
   <link rel="icon" href="assets/icons/bolt.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
@@ -23,26 +23,46 @@
       <a href="index.html" data-nav="home">Home</a>
       <a href="about.html" data-nav="about">The Band</a>
       <a href="shows.html" data-nav="shows">Shows</a>
-      <a href="media.html" data-nav="media">Media</a>
       <a href="calendar.html" data-nav="calendar">Calendar</a>
+      <a href="media.html" data-nav="media">Media</a>
       <a class="nav-book" href="booking.html" data-nav="booking">Book the Band</a>
     </nav>
   </div>
 </header>
 <main id="main-content">
-  <section class="page-hero compact"><div class="page-hero-backdrop"><img src="assets/images/live-stage.webp" alt="Lightning in the Air live onstage"></div><div class="container page-hero-inner"><p class="eyebrow">The Band</p><h1>Southern rock, live.</h1></div></section>
-  <section class="section paper"><div class="container about-grid"><div><p class="eyebrow dark">Lightning in the Air</p><h2>The music lives on.</h2><p class="lede">Lightning in the Air is an Alabama-based tribute to The Marshall Tucker Band.</p><p>Seven musicians bring the hits, deep cuts, harmonies, flute, sax, twin guitars, and long-form jams back to the stage.</p></div><figure class="poster-card"><img src="assets/images/poster.webp" alt="Lightning in the Air promotional poster"></figure></div></section>
-  <section class="section"><div class="container"><div class="section-heading"><div><p class="eyebrow">The lineup</p><h2>Seven-piece sound.</h2></div></div><div class="sound-strip"><span>Lead vocals</span><span>Acoustic guitar</span><span>Lead guitars</span><span>Bass</span><span>Drums</span><span>Keys</span><span>Flute &amp; sax</span></div></div></section>
-  <section class="section blue"><div class="container"><div class="section-heading"><div><p class="eyebrow">Onstage</p><h2>Meet the band live.</h2></div><a class="text-link yellow" href="media.html">Photo gallery →</a></div><div class="portrait-reel"><figure><img src="assets/images/ben-benfield.webp" alt="Lead vocals and acoustic guitar live"><figcaption>Lead vocals</figcaption></figure><figure><img src="assets/images/lead-guitar-left.webp" alt="Lead guitar live"><figcaption>Lead guitar</figcaption></figure><figure><img src="assets/images/taylor-goodwin.webp" alt="Lead guitar live"><figcaption>Lead guitar</figcaption></figure><figure><img src="assets/images/jay-bass.webp" alt="Bass guitar live"><figcaption>Bass</figcaption></figure><figure><img src="assets/images/elliot-keys.webp" alt="Keyboards live"><figcaption>Keys</figcaption></figure><figure><img src="assets/images/sergio-sax.webp" alt="Saxophone live"><figcaption>Flute &amp; sax</figcaption></figure><figure><img src="assets/images/james-drums.webp" alt="Drums live"><figcaption>Drums</figcaption></figure></div></div></section>
+  <section class="page-hero compact band-page-hero">
+    <div class="page-hero-backdrop"><img src="assets/images/band-full.webp" alt="Lightning in the Air together onstage"></div>
+    <div class="container page-hero-inner"><p class="eyebrow">The Band</p><h1>Meet the band.</h1></div>
+  </section>
+
+  <section class="section paper member-section">
+    <div class="container">
+      <div class="section-heading compact-heading"><div><p class="eyebrow dark">Lightning in the Air</p><h2>Seven musicians.</h2></div><p>Click a photo.</p></div>
+      <div class="member-grid" data-member-grid></div>
+    </div>
+  </section>
+
   <section class="quote-band"><div class="container"><blockquote>“A group that truly delivers.”</blockquote><cite>Greg Stone · Shelby County Arts Council</cite></div></section>
+
+  <dialog class="member-dialog" data-member-dialog>
+    <button class="member-dialog-close" type="button" aria-label="Close" data-member-dialog-close>×</button>
+    <div class="member-dialog-grid">
+      <img data-member-dialog-image src="" alt="">
+      <div>
+        <p class="eyebrow dark" data-member-dialog-role></p>
+        <h2 data-member-dialog-name></h2>
+        <p class="member-story" data-member-dialog-story></p>
+      </div>
+    </div>
+  </dialog>
 </main>
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div class="footer-brand"><a class="brand" href="index.html"><img src="assets/icons/bolt.svg" alt=""><span><strong>Lightning in the Air</strong><small>A Marshall Tucker Tribute</small></span></a><p>Southern rock, live.</p></div>
-    <div><h2>Explore</h2><nav><a href="about.html">The Band</a><a href="shows.html">Shows</a><a href="media.html">Media</a><a href="calendar.html">Calendar</a></nav></div>
+    <div class="footer-brand"><a class="brand" href="index.html"><img src="assets/icons/bolt.svg" alt=""><span><strong>Lightning in the Air</strong><small>A Marshall Tucker Tribute</small></span></a></div>
+    <div><h2>Explore</h2><nav><a href="about.html">The Band</a><a href="shows.html">Shows</a><a href="calendar.html">Calendar</a><a href="media.html">Media</a></nav></div>
     <div><h2>Booking</h2><nav><a data-booking-email href="mailto:lita.bhm@gmail.com">lita.bhm@gmail.com</a><a data-booking-phone href="tel:+12053692325">205-369-2325</a><a href="booking.html">Send an inquiry</a></nav></div>
   </div>
-  <div class="container footer-bottom"><span>© <span data-year></span> Lightning in the Air.</span><span>A Marshall Tucker Band tribute.</span></div>
+  <div class="container footer-bottom"><span>© <span data-year></span> Lightning in the Air.</span></div>
 </footer>
 <script type="module" src="js/public-site.js"></script>
 </body>
