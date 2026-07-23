@@ -12,4 +12,4 @@ Expected URL format:
 
 `https://YOUR-USERNAME.github.io/lightning-in-the-air/`
 
-Do not place all files inside a second nested `lightning-in-the-air-site-v2` folder in the repository. `index.html` must be at the repository root.
+Do not place all files inside a second nested `lightning-in-the-air-site-v5` folder in the repository. `index.html` must be at the repository root.

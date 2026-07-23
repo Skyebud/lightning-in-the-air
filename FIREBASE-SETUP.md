@@ -14,7 +14,7 @@ The public website works immediately from the local `data/site-content.json` fil
 
 1. Open **Authentication**.
 2. Enable the **Email/Password** provider.
-3. Create Tom's user under the Users tab. Do not add a public registration page.
+3. Create the administrator user under the Users tab. Do not add a public registration page.
 
 ### Cloud Firestore
 
@@ -29,15 +29,15 @@ The public website works immediately from the local `data/site-content.json` fil
 
 Cloud Storage may require billing to be enabled depending on the Firebase project's current plan and bucket configuration. The public site still works without Storage; only photo uploads in the dashboard require it.
 
-## 3. Authorize Tom as an administrator
+## 3. Authorize the account as an administrator
 
-1. In Authentication, copy Tom's user UID.
+1. In Authentication, copy the user's UID.
 2. In Firestore, create a collection named `admins`.
-3. Create a document whose document ID is exactly Tom's UID.
+3. Create a document whose document ID is exactly the user's UID.
 4. Add these fields:
    - `active` — Boolean — `true`
-   - `email` — String — Tom's sign-in email
-   - `name` — String — `Tom Howle`
+   - `email` — String — the administrator's sign-in email
+   - `name` — String — the administrator's name
 
 The UID document is what the Firestore and Storage rules use to decide who may edit the site.
 
@@ -45,7 +45,7 @@ The UID document is what the Firestore and Storage rules use to decide who may e
 
 1. Commit and publish the updated `js/firebase-config.js`.
 2. Open `admin/login.html` on the deployed website.
-3. Sign in as Tom.
+3. Sign in with the administrator account.
 4. Select **Load starter content** on the dashboard.
 5. The existing videos, settings, and photo references will be copied into Firestore.
 

@@ -4,64 +4,134 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 function setText(selector, value) {
-  $$(selector).forEach((el) => { if (value) el.textContent = value; });
+  $$(selector).forEach((el) => {
+    if (value !== undefined && value !== null) el.textContent = value;
+  });
 }
 function setLink(selector, url) {
   $$(selector).forEach((el) => {
-    if (url) { el.href = url; el.hidden = false; }
-    else { el.removeAttribute("href"); el.hidden = true; }
+    if (url) {
+      el.href = url;
+      el.hidden = false;
+    } else {
+      el.removeAttribute("href");
+      el.hidden = true;
+    }
   });
 }
-function phoneHref(value = "") { return `tel:${value.replace(/[^+\d]/g, "")}`; }
-function embedUrl(url) {
-  const id = youtubeId(url);
-  return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : "";
+function phoneHref(value = "") {
+  return `tel:${value.replace(/[^+\d]/g, "")}`;
 }
-function createIframe(video, title = video.title) {
+function youtubeWatchUrl(video) {
+  const id = youtubeId(video.youtubeUrl);
+  return id ? `https://www.youtube.com/watch?v=${id}` : video.youtubeUrl;
+}
+function embedUrl(video) {
+  const id = youtubeId(video.youtubeUrl);
+  if (!id) return "";
+  const params = new URLSearchParams({ rel: "0", playsinline: "1" });
+  if (["http:", "https:"].includes(window.location.protocol)) {
+    params.set("origin", window.location.origin);
+  }
+  return `https://www.youtube.com/embed/${id}?${params.toString()}`;
+}
+function createVideoPlayer(video, eager = false) {
+  const id = youtubeId(video.youtubeUrl);
+  const wrapper = document.createElement("div");
+  wrapper.className = "video-player";
+
+  // YouTube requires a web-page referrer. A local file preview cannot provide one,
+  // so use a clean poster instead of showing a broken player.
+  if (window.location.protocol === "file:") {
+    const link = document.createElement("a");
+    link.className = "video-poster";
+    link.href = youtubeWatchUrl(video);
+    link.target = "_blank";
+    link.rel = "noopener";
+    const image = document.createElement("img");
+    image.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    image.alt = video.title;
+    const play = document.createElement("span");
+    play.className = "play-button";
+    play.setAttribute("aria-hidden", "true");
+    play.textContent = "▶";
+    link.append(image, play);
+    wrapper.append(link);
+    return wrapper;
+  }
+
   const frame = document.createElement("iframe");
-  frame.src = embedUrl(video.youtubeUrl);
-  frame.title = title;
-  frame.loading = "lazy";
+  frame.src = embedUrl(video);
+  frame.title = video.title;
+  frame.loading = eager ? "eager" : "lazy";
+  frame.referrerPolicy = "strict-origin-when-cross-origin";
   frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
   frame.allowFullscreen = true;
-  return frame;
+  wrapper.append(frame);
+  return wrapper;
 }
 function createVideoCard(video, className = "video-card") {
   const article = document.createElement("article");
   article.className = className;
-  article.append(createIframe(video));
+  article.append(createVideoPlayer(video));
   const copy = document.createElement("div");
-  copy.className = className === "performance-card" ? "" : "video-card-copy";
-  const h3 = document.createElement("h3"); h3.textContent = video.title;
-  copy.append(h3);
-  if (video.description) { const p = document.createElement("p"); p.textContent = video.description; copy.append(p); }
+  copy.className = className === "performance-card" ? "performance-copy" : "video-card-copy";
+  const title = document.createElement("h3");
+  title.textContent = video.title;
+  copy.append(title);
   article.append(copy);
   return article;
 }
+function parseShowDate(show) {
+  return show.date ? new Date(`${show.date}T12:00:00`) : null;
+}
 function formatDate(show) {
   if (show.displayDate) return show.displayDate;
-  if (!show.date) return "Date coming soon";
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(`${show.date}T12:00:00`));
+  const date = parseShowDate(show);
+  if (!date) return "Date TBA";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
+function isUpcoming(show) {
+  const date = parseShowDate(show);
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date >= today;
 }
 function showCard(show) {
-  const article = document.createElement("article"); article.className = "show-card";
-  const date = document.createElement("div"); date.className = "show-date"; date.textContent = formatDate(show);
+  const article = document.createElement("article");
+  article.className = "show-card";
+  const date = document.createElement("div");
+  date.className = "show-date";
+  date.textContent = formatDate(show);
   const copy = document.createElement("div");
-  const title = document.createElement("h3"); title.textContent = show.title || show.venue || "Lightning in the Air";
-  const meta = document.createElement("p"); meta.textContent = [show.time, show.venue, [show.city, show.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
-  copy.append(title, meta);
-  if (show.details) { const details = document.createElement("p"); details.textContent = show.details; copy.append(details); }
-  const action = document.createElement("a"); action.className = "button dark";
-  if (show.ticketUrl) { action.href = show.ticketUrl; action.target = "_blank"; action.rel = "noopener"; action.textContent = "Tickets"; }
-  else { action.href = "booking.html"; action.textContent = "Details"; }
+  const title = document.createElement("h3");
+  title.textContent = show.title || show.venue || "Lightning in the Air";
+  const meta = document.createElement("p");
+  meta.textContent = [show.time, show.venue, [show.city, show.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
+  copy.append(title);
+  if (meta.textContent) copy.append(meta);
+  const action = document.createElement("a");
+  action.className = "button dark";
+  if (show.ticketUrl) {
+    action.href = show.ticketUrl;
+    action.target = "_blank";
+    action.rel = "noopener";
+    action.textContent = "Tickets";
+  } else {
+    action.href = "calendar.html";
+    action.textContent = "Details";
+  }
   article.append(date, copy, action);
   return article;
 }
 function emptyShows() {
-  const div = document.createElement("div"); div.className = "empty-state";
-  const h = document.createElement("h3"); h.textContent = "More dates are on the way.";
-  const p = document.createElement("p"); p.textContent = "Follow the band or check back soon for newly announced performances.";
-  div.append(h, p); return div;
+  const div = document.createElement("div");
+  div.className = "empty-state";
+  const title = document.createElement("h3");
+  title.textContent = "New dates coming soon.";
+  div.append(title);
+  return div;
 }
 function setupGallery(photos) {
   const main = $("[data-gallery-main]");
@@ -79,22 +149,110 @@ function setupGallery(photos) {
     $$(".gallery-thumb", thumbs).forEach((button, i) => button.classList.toggle("active", i === index));
   }
   photos.forEach((photo, i) => {
-    const button = document.createElement("button"); button.className = "gallery-thumb"; button.type = "button";
+    const button = document.createElement("button");
+    button.className = "gallery-thumb";
+    button.type = "button";
     button.setAttribute("aria-label", `Show photo ${i + 1}`);
-    const img = document.createElement("img"); img.src = photo.url; img.alt = ""; img.loading = "lazy";
-    button.append(img); button.addEventListener("click", () => render(i)); thumbs.append(button);
+    const image = document.createElement("img");
+    image.src = photo.url;
+    image.alt = "";
+    image.loading = "lazy";
+    button.append(image);
+    button.addEventListener("click", () => render(i));
+    thumbs.append(button);
   });
   $("[data-gallery-prev]")?.addEventListener("click", () => render(index - 1));
   $("[data-gallery-next]")?.addEventListener("click", () => render(index + 1));
   render(0);
 }
 
+function setupCalendar(shows) {
+  const grid = $("[data-calendar-grid]");
+  const label = $("[data-calendar-month]");
+  const list = $("[data-calendar-list]");
+  if (!grid || !label || !list) return;
+
+  const datedShows = shows.filter((show) => parseShowDate(show));
+  const upcoming = datedShows.filter(isUpcoming);
+  const firstDate = parseShowDate(upcoming[0]);
+  let cursor = firstDate ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+  function monthKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+  function renderMonth() {
+    grid.innerHTML = "";
+    label.textContent = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(cursor);
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const days = new Date(year, month + 1, 0).getDate();
+    const previousDays = new Date(year, month, 0).getDate();
+    const today = new Date();
+    const currentMonthKey = monthKey(cursor);
+
+    for (let cell = 0; cell < 42; cell += 1) {
+      const day = cell - firstDay + 1;
+      const box = document.createElement("div");
+      box.className = "calendar-day";
+      let date;
+      if (day < 1) {
+        box.classList.add("outside");
+        date = new Date(year, month - 1, previousDays + day);
+      } else if (day > days) {
+        box.classList.add("outside");
+        date = new Date(year, month + 1, day - days);
+      } else {
+        date = new Date(year, month, day);
+      }
+      const number = document.createElement("span");
+      number.className = "calendar-number";
+      number.textContent = String(date.getDate());
+      box.append(number);
+      if (date.toDateString() === today.toDateString()) box.classList.add("today");
+
+      if (monthKey(date) === currentMonthKey) {
+        const events = datedShows.filter((show) => parseShowDate(show)?.toDateString() === date.toDateString());
+        events.forEach((show) => {
+          const event = document.createElement(show.ticketUrl ? "a" : "span");
+          event.className = "calendar-event";
+          event.textContent = show.venue || show.title || "Show";
+          if (show.ticketUrl) {
+            event.href = show.ticketUrl;
+            event.target = "_blank";
+            event.rel = "noopener";
+          }
+          box.append(event);
+        });
+      }
+      grid.append(box);
+    }
+  }
+
+  list.innerHTML = "";
+  if (upcoming.length) upcoming.forEach((show) => list.append(showCard(show)));
+  else list.append(emptyShows());
+
+  $("[data-calendar-prev]")?.addEventListener("click", () => {
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+    renderMonth();
+  });
+  $("[data-calendar-next]")?.addEventListener("click", () => {
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    renderMonth();
+  });
+  renderMonth();
+}
+
 async function init() {
-  const menu = $("[data-menu-toggle]"); const nav = $("[data-site-nav]");
+  const menu = $("[data-menu-toggle]");
+  const nav = $("[data-site-nav]");
   menu?.addEventListener("click", () => {
     const open = menu.getAttribute("aria-expanded") === "true";
-    menu.setAttribute("aria-expanded", String(!open)); nav?.classList.toggle("open", !open);
+    menu.setAttribute("aria-expanded", String(!open));
+    nav?.classList.toggle("open", !open);
   });
+
   const page = document.body.dataset.page;
   $(`[data-nav="${page}"]`)?.setAttribute("aria-current", "page");
   setText("[data-year]", new Date().getFullYear());
@@ -106,36 +264,42 @@ async function init() {
   setText("[data-hero-text]", settings.heroText);
   setText("[data-home-quote]", `“${settings.homeQuote}”`);
   setText("[data-home-quote-by]", settings.homeQuoteBy);
-  $$('[data-booking-email]').forEach((el) => { el.textContent = settings.bookingEmail; el.href = `mailto:${settings.bookingEmail}`; });
-  $$('[data-booking-phone]').forEach((el) => { el.textContent = settings.bookingPhone; el.href = phoneHref(settings.bookingPhone); });
+  $$('[data-booking-email]').forEach((el) => {
+    el.textContent = settings.bookingEmail;
+    el.href = `mailto:${settings.bookingEmail}`;
+  });
+  $$('[data-booking-phone]').forEach((el) => {
+    el.textContent = settings.bookingPhone;
+    el.href = phoneHref(settings.bookingPhone);
+  });
   setLink("[data-youtube-link]", settings.youtubeUrl);
-  setLink("[data-facebook-link]", settings.facebookUrl);
-  setLink("[data-instagram-link]", settings.instagramUrl);
 
-  const videos = await getVideos();
-  const featured = videos.find((v) => v.featured) || videos[0];
-  const liveVideos = videos.filter((v) => v.id !== featured?.id);
-  const shows = await getShows();
+  const [videos, shows] = await Promise.all([getVideos(), getShows()]);
+  const featured = videos.find((video) => video.featured) || videos[0];
+  const liveVideos = videos.filter((video) => video.id !== featured?.id);
+  const upcoming = shows.filter(isUpcoming);
 
   if (page === "home") {
     const feature = $("[data-featured-video]");
-    if (feature && featured) feature.append(createIframe(featured));
+    if (feature && featured) feature.append(createVideoPlayer(featured, true));
     const preview = $("[data-show-preview]");
-    if (preview) { if (shows.length) shows.slice(0, 2).forEach((show) => preview.append(showCard(show))); else preview.append(emptyShows()); }
+    if (preview) {
+      if (upcoming.length) upcoming.slice(0, 2).forEach((show) => preview.append(showCard(show)));
+      else preview.append(emptyShows());
+    }
   }
   if (page === "shows") {
-    const target = $("[data-shows-list]");
-    if (target) { if (shows.length) shows.forEach((show) => target.append(showCard(show))); else target.append(emptyShows()); }
     const performances = $("[data-performance-grid]");
-    liveVideos.slice(0, 3).forEach((video) => performances?.append(createVideoCard(video, "performance-card")));
+    liveVideos.forEach((video) => performances?.append(createVideoCard(video, "performance-card")));
   }
   if (page === "media") {
     const feature = $("[data-media-feature]");
-    if (feature && featured) feature.append(createIframe(featured));
-    const grid = $("[data-video-grid]");
-    liveVideos.forEach((video) => grid?.append(createVideoCard(video)));
+    if (feature && featured) feature.append(createVideoPlayer(featured, true));
+    const videoGrid = $("[data-video-grid]");
+    liveVideos.forEach((video) => videoGrid?.append(createVideoCard(video)));
     setupGallery(await getPhotos());
   }
+  if (page === "calendar") setupCalendar(shows);
 
   const form = $("[data-booking-form]");
   form?.addEventListener("submit", (event) => {
@@ -151,10 +315,10 @@ async function init() {
       `Event type: ${data.get("eventType") || "Not provided"}`,
       `Location: ${data.get("location") || "Not provided"}`,
       "",
-      "Event details:",
-      data.get("message") || "Not provided"
+      data.get("message") || ""
     ].join("\n");
     window.location.href = `mailto:${encodeURIComponent(settings.bookingEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   });
 }
+
 init().catch((error) => console.error(error));

@@ -1,10 +1,10 @@
 {
   "site": {
-    "announcement": "Now booking select 2026 and 2027 dates",
-    "heroEyebrow": "Alabama's Marshall Tucker Band tribute",
-    "heroTitle": "Turn it up.",
-    "heroText": "Seven musicians bringing the songs, harmonies, jams, and Southern-rock energy of The Marshall Tucker Band back to the stage.",
-    "bookingContact": "Booking Team",
+    "announcement": "Now booking 2026–2027",
+    "heroEyebrow": "A Marshall Tucker Band Tribute",
+    "heroTitle": "Live Southern Rock.",
+    "heroText": "The songs. The sound. The show.",
+    "bookingContact": "The Band",
     "bookingEmail": "lita.bhm@gmail.com",
     "bookingPhone": "205-369-2325",
     "youtubeUrl": "https://www.youtube.com/@LightningintheAir",
@@ -35,7 +35,7 @@
       "id": "promo",
       "title": "Official Lightning in the Air Tribute Promo",
       "youtubeUrl": "https://www.youtube.com/watch?v=C7-L9rXvx_E",
-      "description": "Official band promo.",
+      "description": "",
       "featured": true,
       "published": true,
       "order": 1
@@ -44,7 +44,7 @@
       "id": "this-old-cowboy",
       "title": "This Old Cowboy",
       "youtubeUrl": "https://www.youtube.com/watch?v=Co87KF1CaIY",
-      "description": "Live performance short.",
+      "description": "",
       "featured": false,
       "published": true,
       "order": 2
@@ -53,7 +53,7 @@
       "id": "bob-away-my-blues",
       "title": "Bob Away My Blues at Elysian Gardens",
       "youtubeUrl": "https://www.youtube.com/watch?v=aNBCM6lxMmQ",
-      "description": "Live at Elysian Gardens.",
+      "description": "",
       "featured": false,
       "published": true,
       "order": 3
@@ -62,7 +62,7 @@
       "id": "cant-you-see",
       "title": "Can't You See",
       "youtubeUrl": "https://www.youtube.com/watch?v=QXJ6T0qer9s",
-      "description": "Live performance short.",
+      "description": "",
       "featured": false,
       "published": true,
       "order": 4
@@ -71,7 +71,7 @@
       "id": "take-the-highway",
       "title": "Take the Highway",
       "youtubeUrl": "https://www.youtube.com/watch?v=DNQ7OpRf8Io",
-      "description": "Live performance video.",
+      "description": "",
       "featured": false,
       "published": true,
       "order": 5
