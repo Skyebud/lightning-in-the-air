@@ -381,3 +381,9 @@ a.calendar-event:hover{background:var(--orange)}
 }
 
 /* Version 9: corrected source crops for Tom Howle and James Patton */
+
+/* Version 10: admin-managed image focal points */
+.member-photo img,.member-profile-image img,.gallery-thumb img{will-change:transform}
+.gallery-thumb{position:relative}
+.gallery-thumb img{transition:transform .25s ease}
+.gallery-thumb:hover img{filter:brightness(1.06)}

@@ -2,3 +2,25 @@
 .admin-stats{grid-template-columns:repeat(4,1fr)}
 @media(max-width:1050px){.admin-stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.admin-stats{grid-template-columns:1fr}}
+
+/* Version 10: visual focal-point editor */
+.crop-editor{display:grid;gap:.9rem;padding:1rem;border:2px solid #273252;border-radius:16px;background:#f4e8c6}
+.crop-editor-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.crop-editor-heading>div{display:grid;gap:.15rem}
+.crop-editor-heading strong{font-family:var(--display);font-size:1.35rem;text-transform:uppercase}
+.crop-editor-heading span{font-size:.76rem;font-weight:750;color:#4e5770;text-transform:none;letter-spacing:normal}
+.crop-reset{border:2px solid #273252;border-radius:999px;background:#fff;color:#07112f;padding:.35rem .7rem;font-weight:900;cursor:pointer}
+.crop-preview{position:relative;overflow:hidden;width:min(100%,520px);margin-inline:auto;border:3px solid #07112f;border-radius:16px;background:#07112f;box-shadow:6px 6px 0 #ef6817;cursor:crosshair;touch-action:none;user-select:none}
+.crop-preview.landscape{aspect-ratio:4/3}
+.crop-preview.portrait{width:min(100%,340px);aspect-ratio:2/3}
+.crop-preview:after{content:"Drag focal point";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:.45rem .7rem;border-radius:999px;background:rgba(7,17,47,.78);color:#fff;font-size:.68rem;font-weight:950;letter-spacing:.05em;text-transform:uppercase;pointer-events:none;opacity:.2;transition:opacity .2s}
+.crop-preview:hover:after,.crop-preview:active:after{opacity:.9}
+.crop-preview.empty:before{content:"Choose an image to preview";position:absolute;inset:0;display:grid;place-items:center;padding:1rem;color:#d9e3fb;text-align:center;font-weight:850}
+.crop-preview.empty:after{display:none}
+.crop-preview img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;will-change:transform}
+.crop-preview.empty img{display:none}
+.crop-controls{display:grid;gap:.7rem}
+.crop-controls label{grid-template-columns:1fr auto;align-items:center;gap:.25rem .75rem}
+.crop-controls output{font-weight:950;color:#0b5ea8}
+.crop-controls input[type="range"]{grid-column:1/-1;padding:0;border:0;background:transparent;accent-color:#0a7fe8}
+@media(max-width:600px){.crop-editor-heading{align-items:flex-start;flex-direction:column}.crop-reset{align-self:flex-end}}

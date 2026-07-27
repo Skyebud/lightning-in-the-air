@@ -1,8 +1,7 @@
-# Lightning in the Air Website — Version 8
-
-Website
+# Lightning in the Air Website — Version 10
 
 Public pages:
+
 - Home
 - The Band, with clickable member profiles
 - Shows, featuring past performances
@@ -10,27 +9,29 @@ Public pages:
 - Calendar, for upcoming dates
 - Booking
 
-The public site reads shows, videos, photos, settings, and member stories from Firebase when configured and falls back to `data/site-content.json` before Firebase is connected. The `/admin/` area is not linked from the public website and is blocked from search indexing.
+The public site reads published shows, videos, photos, settings, and member stories from Firebase when configured. Before Firebase contains starter content, it falls back to `data/site-content.json`.
+
+## Version 10 changes
+
+- Added live Firestore listeners. Published edits appear on open public pages without requiring a refresh.
+- Added visual focal-point controls for gallery photos and member portraits.
+- Admins can click or drag on a preview, adjust horizontal and vertical focus, and change zoom.
+- Saved crop settings automatically apply to member cards, profile photos, and gallery thumbnails.
+- The main gallery image remains uncropped so visitors can still see the complete photograph.
+- Public Firestore queries now request only published records, and the supplied rules prevent public reads of drafts.
 
 ## Previewing locally
 
-Use VS Code Live Server or another local web server. YouTube embeds require an `http://` or `https://` page. Opening `index.html` directly as a `file://` page will show video posters instead of the embedded players.
+Use VS Code Live Server or another local web server. YouTube embeds require an `http://` or `https://` page. Opening `index.html` directly as a `file://` page shows video posters instead of embedded players.
 
-See `FIREBASE-SETUP.md` for the future admin and storage connection steps.
+## Updating an already-connected site
 
+Do not overwrite your working `js/firebase-config.js` with a blank template. The `lightning-in-the-air-v10-update.zip` patch intentionally excludes that file and is the safest way to upgrade an existing repository.
 
-## Version 8 changes
+After copying the update files into the repository:
 
-- Rebuilt the band page with clickable member portraits and on-page profile excerpts.
-- Re-cropped member portraits from the original supplied group photo and enlarged them with non-generative image processing.
-- Removed the song-list section from Shows and placed selected repertoire in a collapsed Booking section.
+1. Publish the new `firestore.rules` in Firebase Console.
+2. Publish the new `storage.rules` if Cloud Storage is enabled.
+3. Commit and push the files through GitHub Desktop.
 
-
-## Version 8 changes
-
-- Reframed the member portraits so faces sit more naturally in the cards and profile sections.
-- Increased the homepage corner logo while keeping it clear of faces.
-
-
-## Version 9
-Re-centered Tom Howle and James Patton using new non-generative crops from the original group photograph.
+See `FIREBASE-SETUP.md` for the full Firebase setup.

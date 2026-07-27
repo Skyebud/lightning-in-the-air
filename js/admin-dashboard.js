@@ -40,6 +40,118 @@ function safeFile(name) {
   return name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
 }
 
+
+const cropEditors = new Map();
+
+const legacyMemberFocal = {
+  "ben-benefield": { focalX: 44, focalY: 50, cropZoom: 1.03 },
+  "sergio-flores": { focalX: 47, focalY: 50, cropZoom: 1.02 }
+};
+
+function cropDefaults(type, item = {}) {
+  if (type === "members") return legacyMemberFocal[item.id] || { focalX: 50, focalY: 50, cropZoom: 1 };
+  return { focalX: 50, focalY: 50, cropZoom: 1 };
+}
+
+function clamp(value, minimum, maximum, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(maximum, Math.max(minimum, number)) : fallback;
+}
+
+function adminPreviewUrl(value = "") {
+  if (!value) return "";
+  if (/^(?:https?:|blob:|data:|\.\.\/|\/)/i.test(value)) return value;
+  return value.startsWith("assets/") ? `../${value}` : value;
+}
+
+function bindCropEditor(type, {
+  formSelector,
+  previewSelector,
+  currentUrlField
+}) {
+  const form = $(formSelector);
+  const preview = $(previewSelector);
+  const image = preview?.querySelector("img");
+  if (!form || !preview || !image) return;
+
+  const fileInput = form.elements.file;
+  const xInput = form.elements.focalX;
+  const yInput = form.elements.focalY;
+  const zoomInput = form.elements.cropZoom;
+  const xOutput = preview.parentElement.querySelector("[data-focal-x-output]");
+  const yOutput = preview.parentElement.querySelector("[data-focal-y-output]");
+  const zoomOutput = preview.parentElement.querySelector("[data-crop-zoom-output]");
+  let objectUrl = "";
+
+  function revokeObjectUrl() {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = "";
+  }
+
+  function source() {
+    if (fileInput?.files?.[0]) {
+      if (!objectUrl) objectUrl = URL.createObjectURL(fileInput.files[0]);
+      return objectUrl;
+    }
+    return adminPreviewUrl(form.elements[currentUrlField]?.value || "");
+  }
+
+  function refresh() {
+    const url = source();
+    const x = clamp(xInput?.value, 0, 100, 50);
+    const y = clamp(yInput?.value, 0, 100, 50);
+    const zoom = clamp(zoomInput?.value, 1, 2, 1);
+
+    preview.classList.toggle("empty", !url);
+    if (url) image.src = url;
+    else image.removeAttribute("src");
+
+    image.style.objectPosition = `${x}% ${y}%`;
+    image.style.transform = `scale(${zoom})`;
+    image.style.transformOrigin = `${x}% ${y}%`;
+
+    if (xOutput) xOutput.textContent = `${Math.round(x)}%`;
+    if (yOutput) yOutput.textContent = `${Math.round(y)}%`;
+    if (zoomOutput) zoomOutput.textContent = `${zoom.toFixed(2)}×`;
+  }
+
+  function setPoint(event) {
+    const bounds = preview.getBoundingClientRect();
+    const x = clamp(((event.clientX - bounds.left) / bounds.width) * 100, 0, 100, 50);
+    const y = clamp(((event.clientY - bounds.top) / bounds.height) * 100, 0, 100, 50);
+    xInput.value = String(Math.round(x));
+    yInput.value = String(Math.round(y));
+    refresh();
+  }
+
+  preview.addEventListener("pointerdown", (event) => {
+    if (!source()) return;
+    preview.setPointerCapture(event.pointerId);
+    setPoint(event);
+  });
+  preview.addEventListener("pointermove", (event) => {
+    if (preview.hasPointerCapture(event.pointerId)) setPoint(event);
+  });
+  preview.addEventListener("pointerup", (event) => {
+    if (preview.hasPointerCapture(event.pointerId)) preview.releasePointerCapture(event.pointerId);
+  });
+
+  [xInput, yInput, zoomInput].forEach((input) => input?.addEventListener("input", refresh));
+  fileInput?.addEventListener("change", () => {
+    revokeObjectUrl();
+    refresh();
+  });
+  preview.parentElement.querySelector("[data-reset-crop]")?.addEventListener("click", () => {
+    xInput.value = "50";
+    yInput.value = "50";
+    zoomInput.value = "1";
+    refresh();
+  });
+
+  cropEditors.set(type, { refresh, revokeObjectUrl });
+  refresh();
+}
+
 async function isAdmin(user) {
   if (!user || !db) return false;
   const snapshot = await getDoc(doc(db, "admins", user.uid));
@@ -145,6 +257,10 @@ function fillForm(type, item) {
   form.reset();
   setFormValue(form, "id", item.id);
   Object.entries(item).forEach(([key, value]) => setFormValue(form, key, value));
+  const defaults = cropDefaults(type, item);
+  if (item.focalX === undefined) setFormValue(form, "focalX", defaults.focalX);
+  if (item.focalY === undefined) setFormValue(form, "focalY", defaults.focalY);
+  if (item.cropZoom === undefined) setFormValue(form, "cropZoom", defaults.cropZoom);
 
   if (type === "photos") {
     setFormValue(form, "currentUrl", item.url);
@@ -157,6 +273,8 @@ function fillForm(type, item) {
 
   $(`[data-${singular}-form-title]`).textContent = `Edit ${type === "members" ? "member" : singular}`;
   $(`[data-delete-${singular}]`).hidden = false;
+  cropEditors.get(singular)?.revokeObjectUrl();
+  cropEditors.get(singular)?.refresh();
   form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -172,6 +290,8 @@ function resetForm(type) {
   if (title) title.textContent = `Add a ${type}`;
   const deleteButton = $(`[data-delete-${type}]`);
   if (deleteButton) deleteButton.hidden = true;
+  cropEditors.get(type)?.revokeObjectUrl();
+  cropEditors.get(type)?.refresh();
 }
 
 function formObject(form) {
@@ -179,7 +299,7 @@ function formObject(form) {
   [...form.elements].forEach((field) => {
     if (!field.name || ["id", "file", "currentUrl", "currentPhotoUrl", "storagePath"].includes(field.name)) return;
     if (field.type === "checkbox") payload[field.name] = field.checked;
-    else if (field.type === "number") payload[field.name] = Number(field.value) || 0;
+    else if (["number", "range"].includes(field.type)) payload[field.name] = Number(field.value) || 0;
     else payload[field.name] = field.value.trim();
   });
   return payload;
@@ -411,6 +531,16 @@ async function start(user) {
   bindTabs();
   bindSimpleCollection("show", "shows");
   bindSimpleCollection("video", "videos");
+  bindCropEditor("photo", {
+    formSelector: "[data-photo-form]",
+    previewSelector: "[data-photo-crop-preview]",
+    currentUrlField: "currentUrl"
+  });
+  bindCropEditor("member", {
+    formSelector: "[data-member-form]",
+    previewSelector: "[data-member-crop-preview]",
+    currentUrlField: "currentPhotoUrl"
+  });
   bindPhotos();
   bindMembers();
   bindSettings();

@@ -46,12 +46,32 @@
 
       <section class="admin-panel" data-admin-panel="photos">
         <div class="admin-heading"><div><p class="eyebrow">Photos</p><h1>Gallery.</h1></div><button class="button primary" data-new-photo>New photo</button></div>
-        <div class="admin-two-column"><div data-photo-admin-list class="admin-list"></div><form data-photo-form class="admin-form"><input type="hidden" name="id"><input type="hidden" name="currentUrl"><input type="hidden" name="storagePath"><h2 data-photo-form-title>Add a photo</h2><label>Image file<input type="file" name="file" accept="image/jpeg,image/png,image/webp"></label><div class="upload-progress" data-photo-upload-progress hidden><span></span></div><label>Caption<input name="caption" required></label><label>Alt text<input name="alt" required></label><div class="checkbox-row"><label><input type="checkbox" name="published" checked> Published</label><label><input type="checkbox" name="featured"> Featured</label></div><label>Display order<input type="number" name="order" value="10"></label><div class="button-row"><button class="button dark" type="submit">Save photo</button><button class="button danger" type="button" data-delete-photo hidden>Delete</button></div><p class="admin-message" data-photo-message></p></form></div>
+        <div class="admin-two-column"><div data-photo-admin-list class="admin-list"></div><form data-photo-form class="admin-form"><input type="hidden" name="id"><input type="hidden" name="currentUrl"><input type="hidden" name="storagePath"><h2 data-photo-form-title>Add a photo</h2><label>Image file<input type="file" name="file" accept="image/jpeg,image/png,image/webp"></label><div class="upload-progress" data-photo-upload-progress hidden><span></span></div>
+          <section class="crop-editor" aria-labelledby="photo-crop-title">
+            <div class="crop-editor-heading"><div><strong id="photo-crop-title">Thumbnail crop</strong><span>Click or drag to choose the focal point.</span></div><button type="button" class="crop-reset" data-reset-crop>Center</button></div>
+            <div class="crop-preview landscape empty" data-photo-crop-preview><img alt="Photo crop preview"></div>
+            <div class="crop-controls">
+              <label>Horizontal focus <output data-focal-x-output>50%</output><input type="range" name="focalX" min="0" max="100" value="50"></label>
+              <label>Vertical focus <output data-focal-y-output>50%</output><input type="range" name="focalY" min="0" max="100" value="50"></label>
+              <label>Zoom <output data-crop-zoom-output>1.00×</output><input type="range" name="cropZoom" min="1" max="2" step="0.01" value="1"></label>
+            </div>
+          </section>
+          <label>Caption<input name="caption" required></label><label>Alt text<input name="alt" required></label><div class="checkbox-row"><label><input type="checkbox" name="published" checked> Published</label><label><input type="checkbox" name="featured"> Featured</label></div><label>Display order<input type="number" name="order" value="10"></label><div class="button-row"><button class="button dark" type="submit">Save photo</button><button class="button danger" type="button" data-delete-photo hidden>Delete</button></div><p class="admin-message" data-photo-message></p></form></div>
       </section>
 
       <section class="admin-panel" data-admin-panel="members">
         <div class="admin-heading"><div><p class="eyebrow">The Band</p><h1>Member stories.</h1></div><button class="button primary" data-new-member>New member</button></div>
-        <div class="admin-two-column"><div data-member-admin-list class="admin-list"></div><form data-member-form class="admin-form"><input type="hidden" name="id"><input type="hidden" name="currentPhotoUrl"><input type="hidden" name="storagePath"><h2 data-member-form-title>Add a member</h2><label>Name<input name="name" required></label><label>Role<input name="role" required></label><label>Member photo<input type="file" name="file" accept="image/jpeg,image/png,image/webp"></label><div class="upload-progress" data-member-upload-progress hidden><span></span></div><label>Photo alt text<input name="photoAlt" required></label><label>Story<textarea name="story" rows="9" placeholder="Add the member story when it is ready."></textarea></label><div class="checkbox-row"><label><input type="checkbox" name="published" checked> Published</label></div><label>Display order<input type="number" name="order" value="10"></label><div class="button-row"><button class="button dark" type="submit">Save member</button><button class="button danger" type="button" data-delete-member hidden>Delete</button></div><p class="admin-message" data-member-message></p></form></div>
+        <div class="admin-two-column"><div data-member-admin-list class="admin-list"></div><form data-member-form class="admin-form"><input type="hidden" name="id"><input type="hidden" name="currentPhotoUrl"><input type="hidden" name="storagePath"><h2 data-member-form-title>Add a member</h2><label>Name<input name="name" required></label><label>Role<input name="role" required></label><label>Member photo<input type="file" name="file" accept="image/jpeg,image/png,image/webp"></label><div class="upload-progress" data-member-upload-progress hidden><span></span></div>
+          <section class="crop-editor" aria-labelledby="member-crop-title">
+            <div class="crop-editor-heading"><div><strong id="member-crop-title">Portrait crop</strong><span>Click or drag to keep the face centered.</span></div><button type="button" class="crop-reset" data-reset-crop>Center</button></div>
+            <div class="crop-preview portrait empty" data-member-crop-preview><img alt="Member crop preview"></div>
+            <div class="crop-controls">
+              <label>Horizontal focus <output data-focal-x-output>50%</output><input type="range" name="focalX" min="0" max="100" value="50"></label>
+              <label>Vertical focus <output data-focal-y-output>50%</output><input type="range" name="focalY" min="0" max="100" value="50"></label>
+              <label>Zoom <output data-crop-zoom-output>1.00×</output><input type="range" name="cropZoom" min="1" max="2" step="0.01" value="1"></label>
+            </div>
+          </section>
+          <label>Photo alt text<input name="photoAlt" required></label><label>Story<textarea name="story" rows="9" placeholder="Add the member story when it is ready."></textarea></label><div class="checkbox-row"><label><input type="checkbox" name="published" checked> Published</label></div><label>Display order<input type="number" name="order" value="10"></label><div class="button-row"><button class="button dark" type="submit">Save member</button><button class="button danger" type="button" data-delete-member hidden>Delete</button></div><p class="admin-message" data-member-message></p></form></div>
       </section>
 
       <section class="admin-panel" data-admin-panel="settings">

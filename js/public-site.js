@@ -1,14 +1,20 @@
 import {
-  getSettings,
-  getShows,
-  getVideos,
-  getPhotos,
-  getMembers,
+  subscribeSettings,
+  subscribeShows,
+  subscribeVideos,
+  subscribePhotos,
+  subscribeMembers,
   youtubeId
 } from "./content-store.js";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+const page = document.body.dataset.page;
+let currentSettings = {};
+let galleryIndex = 0;
+let galleryActiveId = "";
+let calendarCursor = null;
 
 function setText(selector, value) {
   $$(selector).forEach((element) => {
@@ -26,6 +32,41 @@ function setLink(selector, url) {
       element.hidden = true;
     }
   });
+}
+
+function clear(element) {
+  if (element) element.replaceChildren();
+}
+
+function clamp(value, minimum, maximum, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(maximum, Math.max(minimum, number)) : fallback;
+}
+
+const legacyMemberFocal = {
+  "ben-benefield": { x: 44, y: 50, zoom: 1.03 },
+  "sergio-flores": { x: 47, y: 50, zoom: 1.02 }
+};
+
+function focal(item = {}) {
+  const defaults = legacyMemberFocal[item.id] || { x: 50, y: 50, zoom: 1 };
+  return {
+    x: clamp(item.focalX, 0, 100, defaults.x),
+    y: clamp(item.focalY, 0, 100, defaults.y),
+    zoom: clamp(item.cropZoom, 1, 2, defaults.zoom)
+  };
+}
+
+function applyCrop(image, item = {}, { zoom = true } = {}) {
+  const point = focal(item);
+  image.style.objectPosition = `${point.x}% ${point.y}%`;
+  if (zoom) {
+    image.style.transform = `scale(${point.zoom})`;
+    image.style.transformOrigin = `${point.x}% ${point.y}%`;
+  } else {
+    image.style.transform = "none";
+    image.style.transformOrigin = "center";
+  }
 }
 
 function phoneHref(value = "") {
@@ -164,23 +205,40 @@ function emptyShows() {
   return box;
 }
 
-function setupGallery(photos) {
+function renderGallery(photos) {
   const main = $("[data-gallery-main]");
   const thumbs = $("[data-gallery-thumbs]");
-  if (!main || !thumbs || !photos.length) return;
+  if (!main || !thumbs) return;
 
   const mainImage = $("img", main);
   const caption = $("[data-gallery-caption]", main);
-  let index = 0;
+  clear(thumbs);
 
-  function render(next) {
-    index = (next + photos.length) % photos.length;
-    const photo = photos[index];
+  if (!photos.length) {
+    main.hidden = true;
+    $("[data-gallery-prev]")?.setAttribute("disabled", "");
+    $("[data-gallery-next]")?.setAttribute("disabled", "");
+    return;
+  }
+
+  main.hidden = false;
+  $("[data-gallery-prev]")?.removeAttribute("disabled");
+  $("[data-gallery-next]")?.removeAttribute("disabled");
+
+  const preservedIndex = photos.findIndex((photo) => photo.id === galleryActiveId);
+  if (preservedIndex >= 0) galleryIndex = preservedIndex;
+  galleryIndex = Math.min(galleryIndex, photos.length - 1);
+
+  function show(next) {
+    galleryIndex = (next + photos.length) % photos.length;
+    const photo = photos[galleryIndex];
+    galleryActiveId = photo.id;
     mainImage.src = photo.url;
     mainImage.alt = photo.alt || photo.caption || "Lightning in the Air";
+    applyCrop(mainImage, photo, { zoom: false });
     caption.textContent = photo.caption || "";
     $$(".gallery-thumb", thumbs).forEach((button, itemIndex) => {
-      button.classList.toggle("active", itemIndex === index);
+      button.classList.toggle("active", itemIndex === galleryIndex);
     });
   }
 
@@ -194,20 +252,25 @@ function setupGallery(photos) {
     image.src = photo.url;
     image.alt = "";
     image.loading = "lazy";
+    applyCrop(image, photo);
     button.append(image);
-    button.addEventListener("click", () => render(itemIndex));
+    button.onclick = () => show(itemIndex);
     thumbs.append(button);
   });
 
-  $("[data-gallery-prev]")?.addEventListener("click", () => render(index - 1));
-  $("[data-gallery-next]")?.addEventListener("click", () => render(index + 1));
-  render(0);
+  const previous = $("[data-gallery-prev]");
+  const next = $("[data-gallery-next]");
+  if (previous) previous.onclick = () => show(galleryIndex - 1);
+  if (next) next.onclick = () => show(galleryIndex + 1);
+  show(galleryIndex);
 }
 
-function setupMembers(members) {
+function renderMembers(members) {
   const grid = $("[data-member-grid]");
   const profiles = $("[data-member-profiles]");
-  if (!grid || !profiles || !members.length) return;
+  if (!grid || !profiles) return;
+  clear(grid);
+  clear(profiles);
 
   members.forEach((member, index) => {
     const anchorId = `member-${member.id || index + 1}`;
@@ -225,6 +288,7 @@ function setupMembers(members) {
     image.alt = member.photoAlt || member.name;
     image.loading = index < 4 ? "eager" : "lazy";
     image.decoding = "async";
+    applyCrop(image, member);
     imageWrap.append(image);
 
     const copy = document.createElement("span");
@@ -252,6 +316,7 @@ function setupMembers(members) {
     detailImage.alt = member.photoAlt || member.name;
     detailImage.loading = "lazy";
     detailImage.decoding = "async";
+    applyCrop(detailImage, member);
     profileImage.append(detailImage);
 
     const detail = document.createElement("div");
@@ -275,7 +340,7 @@ function setupMembers(members) {
   });
 }
 
-function setupCalendar(shows) {
+function renderCalendar(shows) {
   const grid = $("[data-calendar-grid]");
   const label = $("[data-calendar-month]");
   const list = $("[data-calendar-list]");
@@ -283,27 +348,30 @@ function setupCalendar(shows) {
 
   const datedShows = shows.filter((show) => parseShowDate(show));
   const upcoming = datedShows.filter(isUpcoming);
-  const firstDate = parseShowDate(upcoming[0]);
-  let cursor = firstDate
-    ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1)
-    : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+  if (!calendarCursor) {
+    const firstDate = parseShowDate(upcoming[0]);
+    calendarCursor = firstDate
+      ? new Date(firstDate.getFullYear(), firstDate.getMonth(), 1)
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  }
 
   const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
-  function renderMonth() {
+  function drawMonth() {
     grid.innerHTML = "";
     label.textContent = new Intl.DateTimeFormat("en-US", {
       month: "long",
       year: "numeric"
-    }).format(cursor);
+    }).format(calendarCursor);
 
-    const year = cursor.getFullYear();
-    const month = cursor.getMonth();
+    const year = calendarCursor.getFullYear();
+    const month = calendarCursor.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const days = new Date(year, month + 1, 0).getDate();
     const previousDays = new Date(year, month, 0).getDate();
     const today = new Date();
-    const currentMonthKey = monthKey(cursor);
+    const currentMonthKey = monthKey(calendarCursor);
 
     for (let cell = 0; cell < 42; cell += 1) {
       const day = cell - firstDay + 1;
@@ -347,86 +415,87 @@ function setupCalendar(shows) {
     }
   }
 
-  list.innerHTML = "";
+  clear(list);
   if (upcoming.length) upcoming.forEach((show) => list.append(showCard(show)));
   else list.append(emptyShows());
 
-  $("[data-calendar-prev]")?.addEventListener("click", () => {
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
-    renderMonth();
-  });
-  $("[data-calendar-next]")?.addEventListener("click", () => {
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
-    renderMonth();
-  });
+  const previous = $("[data-calendar-prev]");
+  const next = $("[data-calendar-next]");
+  if (previous) {
+    previous.onclick = () => {
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1);
+      drawMonth();
+    };
+  }
+  if (next) {
+    next.onclick = () => {
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1);
+      drawMonth();
+    };
+  }
 
-  renderMonth();
+  drawMonth();
 }
 
-async function init() {
-  const menu = $("[data-menu-toggle]");
-  const nav = $("[data-site-nav]");
-  menu?.addEventListener("click", () => {
-    const open = menu.getAttribute("aria-expanded") === "true";
-    menu.setAttribute("aria-expanded", String(!open));
-    nav?.classList.toggle("open", !open);
-  });
-
-  const page = document.body.dataset.page;
-  $(`[data-nav="${page}"]`)?.setAttribute("aria-current", "page");
-  setText("[data-year]", new Date().getFullYear());
-
-  const settings = await getSettings();
-  setText("[data-announcement]", settings.announcement);
-  setText("[data-home-quote]", `“${settings.homeQuote}”`);
-  setText("[data-home-quote-by]", settings.homeQuoteBy);
+function applySettings(settings) {
+  currentSettings = { ...currentSettings, ...settings };
+  setText("[data-announcement]", currentSettings.announcement);
+  setText("[data-home-quote]", `“${currentSettings.homeQuote || ""}”`);
+  setText("[data-home-quote-by]", currentSettings.homeQuoteBy);
 
   $$("[data-booking-email]").forEach((element) => {
-    element.textContent = settings.bookingEmail;
-    element.href = `mailto:${settings.bookingEmail}`;
+    element.textContent = currentSettings.bookingEmail || "";
+    element.href = `mailto:${currentSettings.bookingEmail || ""}`;
   });
   $$("[data-booking-phone]").forEach((element) => {
-    element.textContent = settings.bookingPhone;
-    element.href = phoneHref(settings.bookingPhone);
+    element.textContent = currentSettings.bookingPhone || "";
+    element.href = phoneHref(currentSettings.bookingPhone || "");
   });
-  setLink("[data-youtube-link]", settings.youtubeUrl);
+  setLink("[data-youtube-link]", currentSettings.youtubeUrl);
+}
 
-  const [videos, shows] = await Promise.all([getVideos(), getShows()]);
+function renderHomeVideos(videos) {
+  const featured = videos.find((video) => video.featured) || videos[0];
+  const feature = $("[data-featured-video]");
+  if (!feature) return;
+  clear(feature);
+  if (featured) feature.append(createVideoPlayer(featured, true));
+}
+
+function renderHomeShows(shows) {
+  const preview = $("[data-show-preview]");
+  if (!preview) return;
+  clear(preview);
+  const upcoming = shows.filter(isUpcoming);
+  if (upcoming.length) upcoming.slice(0, 2).forEach((show) => preview.append(showCard(show)));
+  else preview.append(emptyShows());
+}
+
+function renderShowsVideos(videos) {
   const featured = videos.find((video) => video.featured) || videos[0];
   const liveVideos = videos.filter((video) => video.id !== featured?.id);
-  const upcoming = shows.filter(isUpcoming);
+  const performances = $("[data-performance-grid]");
+  if (!performances) return;
+  clear(performances);
+  liveVideos.forEach((video) => performances.append(createVideoCard(video, "performance-card")));
+}
 
-  if (page === "home") {
-    const feature = $("[data-featured-video]");
-    if (feature && featured) feature.append(createVideoPlayer(featured, true));
+function renderMediaVideos(videos) {
+  const featured = videos.find((video) => video.featured) || videos[0];
+  const liveVideos = videos.filter((video) => video.id !== featured?.id);
+  const feature = $("[data-media-feature]");
+  const videoGrid = $("[data-video-grid]");
+  clear(feature);
+  clear(videoGrid);
+  if (feature && featured) feature.append(createVideoPlayer(featured, true));
+  liveVideos.forEach((video) => videoGrid?.append(createVideoCard(video)));
+}
 
-    const preview = $("[data-show-preview]");
-    if (preview) {
-      if (upcoming.length) upcoming.slice(0, 2).forEach((show) => preview.append(showCard(show)));
-      else preview.append(emptyShows());
-    }
-  }
-
-  if (page === "about") setupMembers(await getMembers());
-
-  if (page === "shows") {
-    const performances = $("[data-performance-grid]");
-    liveVideos.forEach((video) => performances?.append(createVideoCard(video, "performance-card")));
-  }
-
-  if (page === "media") {
-    const feature = $("[data-media-feature]");
-    if (feature && featured) feature.append(createVideoPlayer(featured, true));
-
-    const videoGrid = $("[data-video-grid]");
-    liveVideos.forEach((video) => videoGrid?.append(createVideoCard(video)));
-    setupGallery(await getPhotos());
-  }
-
-  if (page === "calendar") setupCalendar(shows);
-
+function bindBookingForm() {
   const form = $("[data-booking-form]");
-  form?.addEventListener("submit", (event) => {
+  if (!form) return;
+
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(form);
     const subject = `Booking inquiry — ${data.get("organization") || data.get("name")}`;
@@ -441,8 +510,39 @@ async function init() {
       "",
       data.get("message") || ""
     ].join("\n");
-    window.location.href = `mailto:${encodeURIComponent(settings.bookingEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${encodeURIComponent(currentSettings.bookingEmail || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   });
+}
+
+async function init() {
+  const menu = $("[data-menu-toggle]");
+  const nav = $("[data-site-nav]");
+  menu?.addEventListener("click", () => {
+    const open = menu.getAttribute("aria-expanded") === "true";
+    menu.setAttribute("aria-expanded", String(!open));
+    nav?.classList.toggle("open", !open);
+  });
+
+  $(`[data-nav="${page}"]`)?.setAttribute("aria-current", "page");
+  setText("[data-year]", new Date().getFullYear());
+  bindBookingForm();
+
+  await subscribeSettings(applySettings);
+
+  if (page === "home") {
+    await subscribeVideos(renderHomeVideos);
+    await subscribeShows(renderHomeShows);
+  }
+
+  if (page === "about") await subscribeMembers(renderMembers);
+  if (page === "shows") await subscribeVideos(renderShowsVideos);
+
+  if (page === "media") {
+    await subscribeVideos(renderMediaVideos);
+    await subscribePhotos(renderGallery);
+  }
+
+  if (page === "calendar") await subscribeShows(renderCalendar);
 }
 
 init().catch((error) => console.error(error));

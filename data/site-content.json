@@ -82,7 +82,10 @@
       "photoAlt": "Tom Howle playing guitar with Lightning in the Air",
       "story": "Tom Howle brings guitar to the Lightning in the Air lineup.",
       "published": true,
-      "order": 1
+      "order": 1,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "ben-benefield",
@@ -92,7 +95,10 @@
       "photoAlt": "Ben Benefield performing with Lightning in the Air",
       "story": "Ben Benefield leads vocals and adds guitar and percussion to the live show.",
       "published": true,
-      "order": 2
+      "order": 2,
+      "focalX": 44,
+      "focalY": 50,
+      "cropZoom": 1.03
     },
     {
       "id": "taylor-goodwin",
@@ -102,7 +108,10 @@
       "photoAlt": "Taylor Goodwin playing guitar with Lightning in the Air",
       "story": "Taylor Goodwin brings guitar to the band’s Southern rock sound.",
       "published": true,
-      "order": 3
+      "order": 3,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "jaymes-tunnell",
@@ -112,7 +121,10 @@
       "photoAlt": "Jaymes Tunnell playing bass with Lightning in the Air",
       "story": "Jaymes Tunnell holds down the low end on bass.",
       "published": true,
-      "order": 4
+      "order": 4,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "elliot-margolies",
@@ -122,7 +134,10 @@
       "photoAlt": "Elliot Margolies playing keys with Lightning in the Air",
       "story": "Elliot Margolies fills out the band’s sound on keys.",
       "published": true,
-      "order": 5
+      "order": 5,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "sergio-flores",
@@ -132,7 +147,10 @@
       "photoAlt": "Sergio Flores playing saxophone with Lightning in the Air",
       "story": "Sergio Flores brings saxophone and flute to the lineup.",
       "published": true,
-      "order": 6
+      "order": 6,
+      "focalX": 47,
+      "focalY": 50,
+      "cropZoom": 1.02
     },
     {
       "id": "james-patton",
@@ -142,7 +160,10 @@
       "photoAlt": "James Patton playing drums with Lightning in the Air",
       "story": "James Patton drives the show from the drums.",
       "published": true,
-      "order": 7
+      "order": 7,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     }
   ],
   "photos": [
@@ -153,7 +174,10 @@
       "caption": "Lightning in the Air",
       "featured": true,
       "published": true,
-      "order": 1
+      "order": 1,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "stage",
@@ -162,7 +186,10 @@
       "caption": "Live onstage",
       "featured": false,
       "published": true,
-      "order": 2
+      "order": 2,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "guitar-one",
@@ -171,7 +198,10 @@
       "caption": "Tom Howle",
       "featured": false,
       "published": true,
-      "order": 3
+      "order": 3,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "vocals",
@@ -180,7 +210,10 @@
       "caption": "Ben Benefield",
       "featured": false,
       "published": true,
-      "order": 4
+      "order": 4,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "guitar-two",
@@ -189,7 +222,10 @@
       "caption": "Taylor Goodwin",
       "featured": false,
       "published": true,
-      "order": 5
+      "order": 5,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "bass",
@@ -198,7 +234,10 @@
       "caption": "Jaymes Tunnell",
       "featured": false,
       "published": true,
-      "order": 6
+      "order": 6,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "keys",
@@ -207,7 +246,10 @@
       "caption": "Elliot Margolies",
       "featured": false,
       "published": true,
-      "order": 7
+      "order": 7,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "sax",
@@ -216,7 +258,10 @@
       "caption": "Sergio Flores",
       "featured": false,
       "published": true,
-      "order": 8
+      "order": 8,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     },
     {
       "id": "drums",
@@ -225,7 +270,10 @@
       "caption": "James Patton",
       "featured": false,
       "published": true,
-      "order": 9
+      "order": 9,
+      "focalX": 50,
+      "focalY": 50,
+      "cropZoom": 1
     }
   ]
 }
