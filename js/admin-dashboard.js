@@ -7,7 +7,6 @@ import {
   setDoc,
   addDoc,
   deleteDoc,
-  writeBatch
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
   ref,
@@ -26,6 +25,7 @@ let state = {
   photos: [],
   members: [],
   settings: {},
+  bookings: [],
   user: null
 };
 
@@ -166,11 +166,12 @@ async function readCollection(name) {
 }
 
 async function loadAll() {
-  const [shows, videos, photos, members, settingsDoc] = await Promise.all([
+  const [shows, videos, photos, members, bookings, settingsDoc] = await Promise.all([
     readCollection("shows"),
     readCollection("videos"),
     readCollection("photos"),
     readCollection("members"),
+    readBookings(),
     getDoc(doc(db, "site", "settings"))
   ]);
 
@@ -180,12 +181,14 @@ async function loadAll() {
     videos,
     photos,
     members,
+    bookings,
     settings: settingsDoc.exists() ? settingsDoc.data() : {}
   };
   renderAll();
 }
 
 function renderAll() {
+  $("[data-count-bookings]").textContent = state.bookings.filter((item) => item.status === "new").length;
   $("[data-count-shows]").textContent = state.shows.length;
   $("[data-count-videos]").textContent = state.videos.length;
   $("[data-count-photos]").textContent = state.photos.length;
@@ -194,6 +197,7 @@ function renderAll() {
   renderList("videos", state.videos);
   renderList("photos", state.photos);
   renderList("members", state.members);
+  renderBookings();
   fillSettings();
 }
 
@@ -471,6 +475,109 @@ function bindMembers() {
   });
 }
 
+
+async function readBookings() {
+  const snapshot = await getDocs(collection(db, "bookingRequests"));
+  return snapshot.docs
+    .map((item) => ({ id: item.id, ...item.data() }))
+    .sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || Date.parse(a.createdAt || 0) || 0;
+      const bTime = b.createdAt?.toMillis?.() || Date.parse(b.createdAt || 0) || 0;
+      return bTime - aTime;
+    });
+}
+
+function bookingDate(value) {
+  if (!value) return "Date not provided";
+  if (value?.toDate) return value.toDate().toLocaleString();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString();
+}
+
+function renderBookings() {
+  const target = $("[data-booking-admin-list]");
+  if (!target) return;
+  target.innerHTML = "";
+  if (!state.bookings.length) {
+    target.innerHTML = '<div class="admin-notice">No booking requests yet.</div>';
+    return;
+  }
+  state.bookings.forEach((item) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "admin-list-item";
+    row.innerHTML = '<span><strong></strong><span></span></span><span class="badge"></span>';
+    row.querySelector("strong").textContent = item.organization || item.name || "Booking inquiry";
+    row.querySelector("span span").textContent = [item.eventDate || item.date, item.location].filter(Boolean).join(" · ") || bookingDate(item.createdAt);
+    const badge = row.querySelector(".badge");
+    badge.textContent = item.status || "new";
+    badge.classList.toggle("live", item.status === "new");
+    row.addEventListener("click", () => fillBooking(item));
+    target.append(row);
+  });
+}
+
+function fillBooking(item) {
+  const form = $("[data-booking-request-form]");
+  form.elements.id.value = item.id;
+  form.elements.status.value = item.status || "new";
+  form.elements.adminNotes.value = item.adminNotes || "";
+  const details = $("[data-booking-request-details]");
+  const rows = [
+    ["Name", item.name], ["Email", item.email], ["Phone", item.phone],
+    ["Organization", item.organization], ["Event date", item.eventDate || item.date],
+    ["Event type", item.eventType], ["Location", item.location],
+    ["Received", bookingDate(item.createdAt)], ["Message", item.message]
+  ].filter(([, value]) => value);
+  details.innerHTML = "";
+  rows.forEach(([label, value]) => {
+    const row = document.createElement("div");
+    const strong = document.createElement("strong");
+    const content = document.createElement(label === "Email" ? "a" : "span");
+    strong.textContent = label;
+    content.textContent = value;
+    if (label === "Email") content.href = `mailto:${value}`;
+    row.append(strong, content);
+    details.append(row);
+  });
+  $("[data-delete-booking]").hidden = false;
+  if ((item.status || "new") === "new") {
+    setDoc(doc(db, "bookingRequests", item.id), { status: "read", updatedAt: new Date().toISOString() }, { merge: true })
+      .then(loadAll)
+      .catch(console.error);
+  }
+}
+
+function bindBookings() {
+  const form = $("[data-booking-request-form]");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const id = form.elements.id.value;
+    if (!id) return;
+    try {
+      await setDoc(doc(db, "bookingRequests", id), {
+        status: form.elements.status.value,
+        adminNotes: form.elements.adminNotes.value.trim(),
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      await loadAll();
+      message("[data-booking-message]", "Request updated.", "success");
+    } catch (error) {
+      console.error(error);
+      message("[data-booking-message]", "Unable to update request.", "error");
+    }
+  });
+  $("[data-delete-booking]")?.addEventListener("click", async () => {
+    const id = form.elements.id.value;
+    if (!id || !confirm("Delete this booking request?")) return;
+    await deleteDoc(doc(db, "bookingRequests", id));
+    form.reset();
+    $("[data-booking-request-details]").innerHTML = "<p>Select an inquiry to view it.</p>";
+    $("[data-delete-booking]").hidden = true;
+    await loadAll();
+  });
+}
+
 function fillSettings() {
   const form = $("[data-settings-form]");
   Object.entries(state.settings).forEach(([key, value]) => {
@@ -495,28 +602,6 @@ function bindSettings() {
   });
 }
 
-async function seed() {
-  const hasContent = state.shows.length || state.videos.length || state.photos.length || state.members.length;
-  if (hasContent && !confirm("Starter content will be added alongside existing items. Continue?")) return;
-
-  const response = await fetch(new URL("../data/site-content.json", import.meta.url));
-  const data = await response.json();
-  const batch = writeBatch(db);
-  batch.set(doc(db, "site", "settings"), data.site, { merge: true });
-
-  for (const name of ["shows", "videos", "photos", "members"]) {
-    for (const item of data[name] || []) {
-      const copy = { ...item };
-      delete copy.id;
-      batch.set(doc(db, name, item.id), copy, { merge: true });
-    }
-  }
-
-  await batch.commit();
-  await loadAll();
-  message("[data-overview-message]", "Starter content loaded.", "success");
-}
-
 async function start(user) {
   state.user = user;
   $("[data-user-email]").textContent = user.email || "Signed in";
@@ -529,6 +614,7 @@ async function start(user) {
   $("[data-admin-gate]").hidden = true;
   $("[data-admin-app]").hidden = false;
   bindTabs();
+  bindBookings();
   bindSimpleCollection("show", "shows");
   bindSimpleCollection("video", "videos");
   bindCropEditor("photo", {
@@ -544,10 +630,6 @@ async function start(user) {
   bindPhotos();
   bindMembers();
   bindSettings();
-  $("[data-seed-content]").addEventListener("click", () => seed().catch((error) => {
-    console.error(error);
-    message("[data-overview-message]", "Unable to load starter content.", "error");
-  }));
   await loadAll();
 }
 

@@ -7,6 +7,8 @@ import {
   youtubeId
 } from "./content-store.js";
 
+import { functions, firebaseEnabled } from "./firebase-client.js";
+
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -494,23 +496,41 @@ function renderMediaVideos(videos) {
 function bindBookingForm() {
   const form = $("[data-booking-form]");
   if (!form) return;
+  const status = $("[data-booking-status]");
+  const submit = form.querySelector('button[type="submit"]');
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!firebaseEnabled || !functions) {
+      status.textContent = "Online inquiries are temporarily unavailable. Please use the email or phone number shown on this page.";
+      status.className = "form-note error";
+      return;
+    }
+
     const data = new FormData(form);
-    const subject = `Booking inquiry — ${data.get("organization") || data.get("name")}`;
-    const body = [
-      `Name: ${data.get("name")}`,
-      `Email: ${data.get("email")}`,
-      `Phone: ${data.get("phone") || "Not provided"}`,
-      `Venue / Organization: ${data.get("organization") || "Not provided"}`,
-      `Preferred date: ${data.get("date") || "Not confirmed"}`,
-      `Event type: ${data.get("eventType") || "Not provided"}`,
-      `Location: ${data.get("location") || "Not provided"}`,
-      "",
-      data.get("message") || ""
-    ].join("\n");
-    window.location.href = `mailto:${encodeURIComponent(currentSettings.bookingEmail || "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const payload = Object.fromEntries(data.entries());
+    if (payload.website) return;
+
+    submit.disabled = true;
+    status.textContent = "Sending inquiry…";
+    status.className = "form-note";
+
+    try {
+      const { httpsCallable } = await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js");
+      const submitInquiry = httpsCallable(functions, "submitBookingRequest");
+      await submitInquiry(payload);
+      form.reset();
+      status.textContent = "Thanks — your inquiry has been sent to the band.";
+      status.className = "form-note success";
+    } catch (error) {
+      console.error(error);
+      status.textContent = error?.message?.includes("resource-exhausted")
+        ? "Too many attempts. Please wait a few minutes and try again."
+        : "We could not send the inquiry. Please email or call the band directly.";
+      status.className = "form-note error";
+    } finally {
+      submit.disabled = false;
+    }
   });
 }
 

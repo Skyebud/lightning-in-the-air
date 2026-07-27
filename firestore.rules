@@ -32,6 +32,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /bookingRequests/{document} {
+      allow read, update, delete: if isAdmin();
+      allow create: if false;
+    }
+
+    match /mail/{document} {
+      allow read, write: if false;
+    }
+
+    match /submissionLimits/{document} {
+      allow read, write: if false;
+    }
+
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;

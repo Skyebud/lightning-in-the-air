@@ -387,3 +387,5 @@ a.calendar-event:hover{background:var(--orange)}
 .gallery-thumb{position:relative}
 .gallery-thumb img{transition:transform .25s ease}
 .gallery-thumb:hover img{filter:brightness(1.06)}
+
+.website-field{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}.form-note.success{color:#176b39;font-weight:800}.form-note.error{color:#a52020;font-weight:800}.booking-form button[disabled]{opacity:.65;cursor:wait}

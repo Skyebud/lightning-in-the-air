@@ -18,6 +18,7 @@
 <main class="admin-layout">
   <aside class="admin-sidebar">
     <button class="active" data-admin-tab="overview">Overview</button>
+    <button data-admin-tab="bookings">Booking requests</button>
     <button data-admin-tab="shows">Shows</button>
     <button data-admin-tab="videos">Videos</button>
     <button data-admin-tab="photos">Photos</button>
@@ -29,9 +30,15 @@
     <div data-admin-gate class="admin-gate"><h1>Checking access…</h1></div>
     <div data-admin-app hidden>
       <section class="admin-panel active" data-admin-panel="overview">
-        <div class="admin-heading"><div><p class="eyebrow">Dashboard</p><h1>Manage the site.</h1></div><button class="button primary" data-seed-content>Load starter content</button></div>
-        <div class="admin-stats"><article><strong data-count-shows>0</strong><span>Shows</span></article><article><strong data-count-videos>0</strong><span>Videos</span></article><article><strong data-count-photos>0</strong><span>Photos</span></article><article><strong data-count-members>0</strong><span>Members</span></article></div>
+        <div class="admin-heading"><div><p class="eyebrow">Dashboard</p><h1>Manage the site.</h1></div></div>
+        <div class="admin-stats"><article><strong data-count-bookings>0</strong><span>New inquiries</span></article><article><strong data-count-shows>0</strong><span>Shows</span></article><article><strong data-count-videos>0</strong><span>Videos</span></article><article><strong data-count-photos>0</strong><span>Photos</span></article><article><strong data-count-members>0</strong><span>Members</span></article></div>
         <p class="admin-message" data-overview-message></p>
+      </section>
+
+
+      <section class="admin-panel" data-admin-panel="bookings">
+        <div class="admin-heading"><div><p class="eyebrow">Booking</p><h1>Requests.</h1></div></div>
+        <div class="admin-two-column"><div data-booking-admin-list class="admin-list"></div><form data-booking-request-form class="admin-form"><input type="hidden" name="id"><h2>Inquiry details</h2><div data-booking-request-details class="booking-request-details"><p>Select an inquiry to view it.</p></div><label>Status<select name="status"><option value="new">New</option><option value="read">Read</option><option value="contacted">Contacted</option><option value="booked">Booked</option><option value="declined">Declined</option><option value="archived">Archived</option></select></label><label>Private notes<textarea name="adminNotes" rows="6" maxlength="3000"></textarea></label><div class="button-row"><button class="button dark" type="submit">Save request</button><button class="button danger" type="button" data-delete-booking hidden>Delete</button></div><p class="admin-message" data-booking-message></p></form></div>
       </section>
 
       <section class="admin-panel" data-admin-panel="shows">

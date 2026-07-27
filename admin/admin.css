@@ -24,3 +24,5 @@
 .crop-controls output{font-weight:950;color:#0b5ea8}
 .crop-controls input[type="range"]{grid-column:1/-1;padding:0;border:0;background:transparent;accent-color:#0a7fe8}
 @media(max-width:600px){.crop-editor-heading{align-items:flex-start;flex-direction:column}.crop-reset{align-self:flex-end}}
+
+.booking-request-details{display:grid;gap:.7rem;padding:1rem;border:2px solid #cdd5e8;border-radius:14px;background:#f8faff}.booking-request-details>div{display:grid;grid-template-columns:110px 1fr;gap:.8rem;padding-bottom:.6rem;border-bottom:1px solid #dce2ef}.booking-request-details>div:last-child{border-bottom:0}.booking-request-details strong{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}.booking-request-details span,.booking-request-details a{overflow-wrap:anywhere;white-space:pre-wrap}

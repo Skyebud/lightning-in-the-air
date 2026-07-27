@@ -1,70 +1,55 @@
-# Firebase setup for the Lightning in the Air admin dashboard
+# Firebase setup — Lightning in the Air
 
-The public website can fall back to `data/site-content.json`. Admin sign-in, editable records, live updates, and image uploads use Firebase.
+## 1. Connect the web app
 
-## 1. Web app configuration
+Keep the working values already saved in `js/firebase-config.js`. The Firebase web configuration is public client configuration; access is controlled by Authentication and Security Rules.
 
-Copy the Web app configuration from Firebase Console into `js/firebase-config.js`. When upgrading an existing connected site, keep the configuration file already in your repository.
-
-## 2. Authentication
+## 2. Authentication and admin access
 
 1. Enable Email/Password sign-in.
-2. Create the administrator under Authentication → Users.
-3. Do not add public registration to the website.
+2. Create the administrator in Authentication → Users.
+3. In Firestore, create `admins/{USER_UID}` with:
+   - `active`: Boolean `true`
+   - `email`: the administrator email
+   - `name`: the administrator name
 
-## 3. Cloud Firestore
+## 3. Firestore and Storage
 
-1. Create the Firestore database in production mode.
-2. Replace the Firebase Rules editor with `firestore.rules` and publish it.
-3. The supplied public queries read only records where `published` is true. Authorized admins can read and edit drafts.
+Publish `firestore.rules`. If photo uploads are enabled, create the default Storage bucket and publish `storage.rules`.
 
-## 4. Authorize an administrator
+The production site reads content only from Firestore. There is no starter-content loader or local JSON fallback.
 
-1. Copy the user UID from Authentication.
-2. Create the Firestore collection `admins`.
-3. Create a document whose ID exactly matches that UID.
-4. Add:
-   - `active` — Boolean — `true`
-   - `email` — String — the administrator email
-   - `name` — String — the administrator name
+## 4. Booking inquiries and email notifications
 
-## 5. Load starter content
+Booking inquiries use the callable Cloud Function in `functions/index.js`.
 
-1. Open `/admin/login.html` on the deployed website.
-2. Sign in.
-3. Select **Load starter content** once.
+1. Upgrade the Firebase project to Blaze, which is required for deploying Cloud Functions.
+2. Install the Firebase CLI and sign in.
+3. From the project folder, run:
 
-This copies the existing settings, videos, photo references, shows, and member profiles into Firestore.
+```bash
+npm install --prefix functions
+firebase deploy --only functions
+```
 
-## 6. Live updates
+4. In Firebase Extensions, install **Trigger Email**.
+5. Configure the extension to watch the `mail` collection.
+6. Connect the band's SMTP account during extension setup.
+7. Confirm `site/settings.bookingEmail` is the correct band booking address.
 
-The public pages use Firestore snapshot listeners. When an admin saves and publishes a show, video, member, photo, or setting, an already-open public page updates automatically.
+The callable function validates and rate-limits submissions, saves each request to `bookingRequests`, and queues an email document for the Trigger Email extension. Administrators can read and manage requests from the dashboard.
 
-The `Published` checkbox still controls public visibility. Draft records remain available in the dashboard but are not returned to public visitors.
+## 5. Live updates and publishing
 
-## 7. Image focal points
+Published shows, videos, photos, member profiles, and settings update automatically on open public pages. Draft items remain visible only to authorized administrators.
 
-The Photos and Band Members forms include crop previews:
+## 6. Image controls
 
-- Click or drag on the preview to set the focal point.
-- Fine-tune horizontal and vertical focus with sliders.
-- Use Zoom when the source image needs a tighter crop.
-- Save the record to apply the crop to the public site.
+Photo and member forms include focal-point and zoom controls. Saved values are used by the public card and thumbnail layouts.
 
-For gallery photos, the crop settings apply to the thumbnail. The large gallery view continues to show the full image.
+## 7. Final verification
 
-## 8. Cloud Storage
-
-Cloud Storage is only required when uploading replacement or new photos directly from the dashboard.
-
-1. Create the default Storage bucket.
-2. Replace its rules with `storage.rules` and publish.
-
-Storage availability or billing requirements depend on the Firebase project and bucket configuration. Existing local images, Firestore text edits, show dates, and YouTube links work without Storage.
-
-## Security
-
-- Firebase Web configuration is public client configuration, not a password.
-- Security comes from Authentication and the supplied Firestore and Storage rules.
-- Do not use rules that allow unrestricted public writes.
-- Keep administrator registration out of the public site.
+- Submit a booking inquiry and verify the email arrives.
+- Confirm the inquiry appears in the admin dashboard.
+- Test sign-in, sign-out, draft visibility, photo upload, video embeds, and mobile navigation.
+- Keep public registration disabled.
