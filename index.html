@@ -11,6 +11,13 @@
   <link rel="icon" href="assets/icons/bolt.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <title>Lightning in the Air | A Marshall Tucker Tribute</title>
+  <style>
+    #testimonials .home-testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.25rem}
+    #testimonials .home-testimonial-card{display:flex;flex-direction:column;justify-content:space-between;min-height:100%;padding:clamp(1.35rem,3vw,2rem);background:#fff8e4;border:4px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--orange)}
+    #testimonials .home-testimonial-card blockquote{margin:0 0 1.5rem;font-family:var(--display);font-size:clamp(1.65rem,2.6vw,2.6rem);line-height:1.02;text-transform:uppercase;overflow-wrap:anywhere}
+    #testimonials .home-testimonial-card cite{font-style:normal;font-weight:900;color:#7f2a08;text-transform:uppercase;letter-spacing:.055em;font-size:.72rem;line-height:1.45}
+    @media(max-width:600px){#testimonials .home-testimonial-card{box-shadow:6px 6px 0 var(--orange)}}
+  </style>
 </head>
 <body data-page="home">
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -54,10 +61,16 @@
     </div>
   </section>
 
-  <section class="section paper">
-    <div class="container home-quote-grid">
-      <blockquote data-home-quote>“A group that truly delivers.”</blockquote>
-      <cite data-home-quote-by>Greg Stone · Shelby County Arts Council</cite>
+  <section class="section paper" id="testimonials" data-testimonials-section>
+    <div class="container">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow dark">Testimonials</p><h2>What people are saying.</h2></div>
+      </div>
+      <div class="home-testimonials-grid" data-testimonials-grid>
+        <article class="home-testimonial-card"><blockquote>“If you're looking for a band that brings great music, professionalism, and Southern rock the way it ought to be played, you won't go wrong with this group.”</blockquote><cite>Greg Stone · Director—Shelby County Arts Council</cite></article>
+        <article class="home-testimonial-card"><blockquote>“Lightning in the Air puts on a very authentic tribute show for Marshall Tucker Band. Super talented musicians and I really felt like I was hearing the real thing.”</blockquote><cite>Ian Cuthbertson · Dead for Love (Grateful Dead Tribute)</cite></article>
+        <article class="home-testimonial-card"><blockquote>“Lightning in the Air captures the musicianship and sound of the Marshall Tucker Band with hits and deep cuts for both casual and hardcore fans. Definitely must check out!”</blockquote><cite>Kyle Sainhill · Booking Agent, Elysian Gardens, Birmingham</cite></article>
+      </div>
     </div>
   </section>
 

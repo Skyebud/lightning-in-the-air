@@ -2,6 +2,21 @@ import { db, firebaseEnabled } from "./firebase-client.js";
 
 let firestoreApi;
 
+const defaultTestimonials = Object.freeze([
+  {
+    "quote": "If you're looking for a band that brings great music, professionalism, and Southern rock the way it ought to be played, you won't go wrong with this group.",
+    "attribution": "Greg Stone · Director—Shelby County Arts Council"
+  },
+  {
+    "quote": "Lightning in the Air puts on a very authentic tribute show for Marshall Tucker Band. Super talented musicians and I really felt like I was hearing the real thing.",
+    "attribution": "Ian Cuthbertson · Dead for Love (Grateful Dead Tribute)"
+  },
+  {
+    "quote": "Lightning in the Air captures the musicianship and sound of the Marshall Tucker Band with hits and deep cuts for both casual and hardcore fans. Definitely must check out!",
+    "attribution": "Kyle Sainhill · Booking Agent, Elysian Gardens, Birmingham"
+  }
+]);
+
 const emptySettings = Object.freeze({
   announcement: "",
   bookingEmail: "",
@@ -10,8 +25,27 @@ const emptySettings = Object.freeze({
   facebookUrl: "",
   instagramUrl: "",
   homeQuote: "",
-  homeQuoteBy: ""
+  homeQuoteBy: "",
+  testimonials: defaultTestimonials
 });
+
+
+function mergeSettings(data = {}) {
+  const hasTestimonials = Object.prototype.hasOwnProperty.call(data, "testimonials");
+  const testimonials = hasTestimonials
+    ? (Array.isArray(data.testimonials) ? data.testimonials : [])
+    : defaultTestimonials;
+  return {
+    ...emptySettings,
+    ...data,
+    testimonials: testimonials
+      .map((item) => ({
+        quote: String(item?.quote || "").trim(),
+        attribution: String(item?.attribution || "").trim()
+      }))
+      .filter((item) => item.quote)
+  };
+}
 
 async function firestore() {
   if (!firebaseEnabled || !db) return null;
@@ -61,10 +95,10 @@ export async function getSettings() {
   try {
     const { doc, getDoc } = await firestore();
     const snapshot = await getDoc(doc(db, "site", "settings"));
-    return snapshot.exists() ? { ...emptySettings, ...snapshot.data() } : { ...emptySettings };
+    return snapshot.exists() ? mergeSettings(snapshot.data()) : mergeSettings();
   } catch (error) {
     console.error("Unable to load site settings:", error);
-    return { ...emptySettings };
+    return mergeSettings();
   }
 }
 
@@ -120,11 +154,11 @@ export async function subscribeSettings(callback, onError = console.error) {
   return onSnapshot(
     doc(db, "site", "settings"),
     (snapshot) => callback(snapshot.exists()
-      ? { ...emptySettings, ...snapshot.data() }
-      : { ...emptySettings }),
+      ? mergeSettings(snapshot.data())
+      : mergeSettings()),
     (error) => {
       console.error("Live site settings unavailable:", error);
-      callback({ ...emptySettings });
+      callback(mergeSettings());
       onError?.(error);
     }
   );

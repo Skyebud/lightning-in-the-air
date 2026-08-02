@@ -439,11 +439,46 @@ function renderCalendar(shows) {
   drawMonth();
 }
 
+
+function renderTestimonials(settings) {
+  const grid = $("[data-testimonials-grid]");
+  const section = $("[data-testimonials-section]");
+  if (!grid) return;
+
+  const testimonials = Array.isArray(settings.testimonials)
+    ? settings.testimonials
+      .map((item) => ({
+        quote: String(item?.quote || "").trim(),
+        attribution: String(item?.attribution || "").trim()
+      }))
+      .filter((item) => item.quote)
+    : [];
+
+  clear(grid);
+  if (section) section.hidden = testimonials.length === 0;
+
+  testimonials.forEach((item) => {
+    const article = document.createElement("article");
+    article.className = "home-testimonial-card";
+
+    const quote = document.createElement("blockquote");
+    quote.textContent = `“${item.quote}”`;
+    article.append(quote);
+
+    if (item.attribution) {
+      const cite = document.createElement("cite");
+      cite.textContent = item.attribution;
+      article.append(cite);
+    }
+
+    grid.append(article);
+  });
+}
+
 function applySettings(settings) {
   currentSettings = { ...currentSettings, ...settings };
   setText("[data-announcement]", currentSettings.announcement);
-  setText("[data-home-quote]", `“${currentSettings.homeQuote || ""}”`);
-  setText("[data-home-quote-by]", currentSettings.homeQuoteBy);
+  renderTestimonials(currentSettings);
 
   $$("[data-booking-email]").forEach((element) => {
     element.textContent = currentSettings.bookingEmail || "";

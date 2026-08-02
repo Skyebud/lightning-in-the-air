@@ -9,6 +9,20 @@
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="admin.css">
   <title>Band Dashboard | Lightning in the Air</title>
+  <style>
+    .testimonial-editor{display:grid;gap:1rem;padding-top:.5rem;border-top:2px solid #d6c9a3}
+    .testimonial-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .testimonial-editor-heading h2{margin:0}
+    .testimonial-editor-heading p{margin:.25rem 0 0;color:#4e5770;font-size:.84rem}
+    .testimonial-editor-list{display:grid;gap:1rem}
+    .testimonial-editor-item{display:grid;gap:.85rem;padding:1rem;border:2px solid #273252;border-radius:14px;background:#f8edcc}
+    .testimonial-editor-item-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .testimonial-editor-item-header strong{font-family:var(--display);font-size:1.35rem;text-transform:uppercase}
+    .testimonial-editor-actions{display:flex;flex-wrap:wrap;gap:.4rem}
+    .testimonial-editor-actions button{border:2px solid #273252;border-radius:999px;background:#fff;color:#07112f;padding:.35rem .65rem;font-weight:900;cursor:pointer}
+    .testimonial-editor-actions button[data-remove-testimonial]{background:#b52a1d;color:#fff;border-color:#7d1b13}
+    @media(max-width:650px){.testimonial-editor-heading,.testimonial-editor-item-header{align-items:flex-start;flex-direction:column}.testimonial-editor-actions{width:100%}}
+  </style>
 </head>
 <body class="admin-body">
 <header class="admin-topbar">
@@ -23,7 +37,7 @@
     <button data-admin-tab="videos">Videos</button>
     <button data-admin-tab="photos">Photos</button>
     <button data-admin-tab="members">Band members</button>
-    <button data-admin-tab="settings">Site settings</button>
+    <button data-admin-tab="settings">Settings &amp; testimonials</button>
     <a href="../index.html" target="_blank" rel="noopener">Open website ↗</a>
   </aside>
   <section class="admin-content">
@@ -31,7 +45,7 @@
     <div data-admin-app hidden>
       <section class="admin-panel active" data-admin-panel="overview">
         <div class="admin-heading"><div><p class="eyebrow">Dashboard</p><h1>Manage the site.</h1></div></div>
-        <div class="admin-stats"><article><strong data-count-bookings>0</strong><span>New inquiries</span></article><article><strong data-count-shows>0</strong><span>Shows</span></article><article><strong data-count-videos>0</strong><span>Videos</span></article><article><strong data-count-photos>0</strong><span>Photos</span></article><article><strong data-count-members>0</strong><span>Members</span></article></div>
+        <div class="admin-stats"><article><strong data-count-bookings>0</strong><span>New inquiries</span></article><article><strong data-count-shows>0</strong><span>Shows</span></article><article><strong data-count-videos>0</strong><span>Videos</span></article><article><strong data-count-photos>0</strong><span>Photos</span></article><article><strong data-count-members>0</strong><span>Members</span></article><article><strong data-count-testimonials>0</strong><span>Testimonials</span></article></div>
         <p class="admin-message" data-overview-message></p>
       </section>
 
@@ -82,8 +96,8 @@
       </section>
 
       <section class="admin-panel" data-admin-panel="settings">
-        <div class="admin-heading"><div><p class="eyebrow">Site settings</p><h1>Contact and links.</h1></div></div>
-        <form data-settings-form class="admin-form wide"><label>Announcement bar<input name="announcement"></label><div class="form-grid"><label>Booking email<input type="email" name="bookingEmail"></label><label>Booking phone<input name="bookingPhone"></label><label>YouTube channel URL<input type="url" name="youtubeUrl"></label><label>Facebook URL<input type="url" name="facebookUrl"></label><label>Instagram URL<input type="url" name="instagramUrl"></label></div><label>Testimonial quote<textarea name="homeQuote" rows="3"></textarea></label><label>Testimonial attribution<input name="homeQuoteBy"></label><button class="button dark" type="submit">Save settings</button><p class="admin-message" data-settings-message></p></form>
+        <div class="admin-heading"><div><p class="eyebrow">Site settings</p><h1>Contact, links &amp; testimonials.</h1></div></div>
+        <form data-settings-form class="admin-form wide"><label>Announcement bar<input name="announcement"></label><div class="form-grid"><label>Booking email<input type="email" name="bookingEmail"></label><label>Booking phone<input name="bookingPhone"></label><label>YouTube channel URL<input type="url" name="youtubeUrl"></label><label>Facebook URL<input type="url" name="facebookUrl"></label><label>Instagram URL<input type="url" name="instagramUrl"></label></div><section class="testimonial-editor"><div class="testimonial-editor-heading"><div><h2>Testimonials</h2><p>Add as many as needed. Use the arrows to change their order on the homepage.</p></div><button class="button primary admin-small" type="button" data-add-testimonial>Add testimonial</button></div><div class="testimonial-editor-list" data-testimonial-editor-list></div></section><button class="button dark" type="submit">Save settings</button><p class="admin-message" data-settings-message></p></form>
       </section>
     </div>
   </section>

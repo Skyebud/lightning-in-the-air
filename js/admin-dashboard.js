@@ -19,6 +19,21 @@ import { auth, db, storage, firebaseEnabled } from "./firebase-client.js";
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
+const defaultTestimonials = [
+  {
+    "quote": "If you're looking for a band that brings great music, professionalism, and Southern rock the way it ought to be played, you won't go wrong with this group.",
+    "attribution": "Greg Stone · Director—Shelby County Arts Council"
+  },
+  {
+    "quote": "Lightning in the Air puts on a very authentic tribute show for Marshall Tucker Band. Super talented musicians and I really felt like I was hearing the real thing.",
+    "attribution": "Ian Cuthbertson · Dead for Love (Grateful Dead Tribute)"
+  },
+  {
+    "quote": "Lightning in the Air captures the musicianship and sound of the Marshall Tucker Band with hits and deep cuts for both casual and hardcore fans. Definitely must check out!",
+    "attribution": "Kyle Sainhill · Booking Agent, Elysian Gardens, Birmingham"
+  }
+];
+
 let state = {
   shows: [],
   videos: [],
@@ -193,6 +208,7 @@ function renderAll() {
   $("[data-count-videos]").textContent = state.videos.length;
   $("[data-count-photos]").textContent = state.photos.length;
   $("[data-count-members]").textContent = state.members.length;
+  $("[data-count-testimonials]").textContent = normalizeTestimonials(state.settings).length;
   renderList("shows", state.shows);
   renderList("videos", state.videos);
   renderList("photos", state.photos);
@@ -578,11 +594,107 @@ function bindBookings() {
   });
 }
 
+function cleanLegacyQuote(value = "") {
+  return String(value).trim().replace(/^[“"]+|[”"]+$/g, "").trim();
+}
+
+function normalizeTestimonials(settings = {}) {
+  if (Array.isArray(settings.testimonials)) {
+    return settings.testimonials
+      .map((item) => ({
+        quote: String(item?.quote || "").trim(),
+        attribution: String(item?.attribution || "").trim()
+      }))
+      .filter((item) => item.quote);
+  }
+
+  const legacyQuote = cleanLegacyQuote(settings.homeQuote);
+  const legacyAttribution = String(settings.homeQuoteBy || "").trim();
+  const looksCombined = legacyQuote.length > 450
+    && /Greg Stone/i.test(legacyQuote)
+    && /Ian Cuthbertson/i.test(legacyQuote)
+    && /Kyle Sainhill/i.test(legacyQuote);
+
+  if (looksCombined || !legacyQuote) return defaultTestimonials.map((item) => ({ ...item }));
+  return [{ quote: legacyQuote, attribution: legacyAttribution }];
+}
+
+function refreshTestimonialLabels() {
+  $$("[data-testimonial-editor-item]").forEach((row, index) => {
+    row.querySelector("[data-testimonial-number]").textContent = `Testimonial ${index + 1}`;
+  });
+}
+
+function createTestimonialEditorItem(item = {}) {
+  const row = document.createElement("article");
+  row.className = "testimonial-editor-item";
+  row.dataset.testimonialEditorItem = "";
+  row.innerHTML = `
+    <div class="testimonial-editor-item-header">
+      <strong data-testimonial-number>Testimonial</strong>
+      <div class="testimonial-editor-actions">
+        <button type="button" data-move-testimonial-up aria-label="Move testimonial up">↑ Up</button>
+        <button type="button" data-move-testimonial-down aria-label="Move testimonial down">↓ Down</button>
+        <button type="button" data-remove-testimonial>Remove</button>
+      </div>
+    </div>
+    <label>Quote<textarea rows="5" maxlength="1200" data-testimonial-quote></textarea></label>
+    <label>Attribution<input maxlength="240" data-testimonial-attribution></label>`;
+
+  row.querySelector("[data-testimonial-quote]").value = item.quote || "";
+  row.querySelector("[data-testimonial-attribution]").value = item.attribution || "";
+
+  row.querySelector("[data-move-testimonial-up]").addEventListener("click", () => {
+    const previous = row.previousElementSibling;
+    if (previous) row.parentElement.insertBefore(row, previous);
+    refreshTestimonialLabels();
+  });
+  row.querySelector("[data-move-testimonial-down]").addEventListener("click", () => {
+    const next = row.nextElementSibling;
+    if (next) row.parentElement.insertBefore(next, row);
+    refreshTestimonialLabels();
+  });
+  row.querySelector("[data-remove-testimonial]").addEventListener("click", () => {
+    row.remove();
+    refreshTestimonialLabels();
+  });
+
+  return row;
+}
+
+function renderTestimonialEditor(items) {
+  const list = $("[data-testimonial-editor-list]");
+  if (!list) return;
+  list.replaceChildren();
+  items.forEach((item) => list.append(createTestimonialEditorItem(item)));
+  refreshTestimonialLabels();
+}
+
+function serializeTestimonials() {
+  return $$("[data-testimonial-editor-item]")
+    .map((row) => ({
+      quote: row.querySelector("[data-testimonial-quote]").value.trim(),
+      attribution: row.querySelector("[data-testimonial-attribution]").value.trim()
+    }))
+    .filter((item) => item.quote);
+}
+
+function bindTestimonialEditor() {
+  $("[data-add-testimonial]")?.addEventListener("click", () => {
+    const list = $("[data-testimonial-editor-list]");
+    const row = createTestimonialEditorItem();
+    list.append(row);
+    refreshTestimonialLabels();
+    row.querySelector("[data-testimonial-quote]").focus();
+  });
+}
+
 function fillSettings() {
   const form = $("[data-settings-form]");
   Object.entries(state.settings).forEach(([key, value]) => {
-    if (form.elements[key]) form.elements[key].value = value ?? "";
+    if (typeof value !== "object" && form.elements[key]) form.elements[key].value = value ?? "";
   });
+  renderTestimonialEditor(normalizeTestimonials(state.settings));
 }
 
 function bindSettings() {
@@ -591,10 +703,14 @@ function bindSettings() {
     event.preventDefault();
     try {
       const payload = formObject(form);
+      payload.testimonials = serializeTestimonials();
+      payload.homeQuote = "";
+      payload.homeQuoteBy = "";
       payload.updatedAt = new Date().toISOString();
       await setDoc(doc(db, "site", "settings"), payload, { merge: true });
       state.settings = { ...state.settings, ...payload };
-      message("[data-settings-message]", "Settings saved.", "success");
+      $("[data-count-testimonials]").textContent = payload.testimonials.length;
+      message("[data-settings-message]", "Settings and testimonials saved.", "success");
     } catch (error) {
       console.error(error);
       message("[data-settings-message]", "Unable to save settings.", "error");
@@ -629,6 +745,7 @@ async function start(user) {
   });
   bindPhotos();
   bindMembers();
+  bindTestimonialEditor();
   bindSettings();
   await loadAll();
 }
